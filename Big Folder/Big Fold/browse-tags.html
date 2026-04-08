@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Browse Tags — Orident Inc</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+/* ── PAGE ── */
+.page-wrap{max-width:1200px;margin:0 auto;padding:40px 5% 80px;}
+.page-hero{text-align:center;padding:60px 0 40px;}
+.page-hero .ph-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.page-hero h1{font-family:'Sora',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;color:var(--ink);letter-spacing:-1px;margin-bottom:14px;}
+.page-hero p{font-size:16px;color:var(--muted);max-width:520px;margin:0 auto 32px;line-height:1.7;}
+
+/* ── SEARCH BAR ── */
+.search-wrap{max-width:540px;margin:0 auto 36px;position:relative;}
+.search-wrap svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--muted);}
+.search-input{width:100%;padding:15px 16px 15px 46px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);background:white;outline:none;transition:border-color .2s,box-shadow .2s;}
+.search-input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(0,0,0,0.07);}
+.search-results-count{text-align:center;font-size:13px;color:var(--muted);margin-bottom:20px;min-height:20px;}
+
+/* ── ALPHABET NAV ── */
+.alpha-nav{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;padding:14px 20px;background:var(--surface);border-radius:12px;border:1px solid var(--border);}
+.alpha-btn{min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:none;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:6px;transition:all .15s;padding:0 6px;}
+.alpha-btn:hover{background:var(--ink);color:white;}
+.alpha-btn.has-tags{color:var(--ink);}
+.alpha-btn.active{background:var(--ink);color:white;}
+
+/* ── LETTER SECTION ── */
+.letter-section{margin-bottom:40px;}
+.letter-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--ink);}
+.letter-char{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;color:var(--ink);line-height:1;}
+.letter-count{font-size:12px;color:var(--muted);font-weight:500;}
+
+/* ── TAG GRID ── */
+.tags-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+
+/* ── TAG CARD ── */
+.tag-card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.tag-card:hover{border-color:var(--ink2);box-shadow:var(--shadow2);transform:translateY(-2px);}
+.tag-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.tag-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+.tag-name{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--ink);flex:1;line-height:1.3;}
+.tag-badge{font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
+.badge-stocks{background:#eee;color:#444;}
+.badge-crypto{background:#FFF5E6;color:#B36A00;}
+.badge-forex{background:#E6F0FF;color:#1A3A7A;}
+.badge-sector{background:#F0E6FF;color:#5A1A9A;}
+.badge-theme{background:#E6FFF0;color:#1A6A40;}
+.badge-commodity{background:#FFF8E6;color:#7A5A00;}
+.badge-index{background:#FFE6E6;color:#7A1A1A;}
+.badge-reit{background:#E6F5FF;color:#1A4A7A;}
+.badge-etf{background:#E6FFE6;color:#1A5A1A;}
+.badge-macro{background:#F5E6FF;color:#5A1A7A;}
+
+.tag-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;}
+.tag-stocks{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.tag-sym{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--ink2);}
+.tag-live{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);}
+.tag-price{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--ink);}
+.tag-chg{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;padding:2px 7px;border-radius:4px;}
+.tag-chg.up{background:var(--green2);color:var(--green);}
+.tag-chg.dn{background:var(--red2);color:var(--red);}
+
+/* ── NO RESULTS ── */
+.no-results{text-align:center;padding:60px 20px;color:var(--muted);}
+.no-results svg{margin-bottom:12px;opacity:.3;}
+
+/* ── ADMIN PANEL ── */
+.admin-fab{position:fixed;bottom:28px;right:28px;width:52px;height:52px;background:#2C2C2C;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,0.3);z-index:900;transition:transform .2s;border:none;}
+.admin-fab:hover{transform:scale(1.1);}
+.admin-panel{position:fixed;top:0;right:-420px;width:420px;height:100vh;background:white;box-shadow:-4px 0 40px rgba(0,0,0,0.15);z-index:1000;transition:right .3s ease;overflow-y:auto;}
+.admin-panel.open{right:0;}
+.admin-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:1;}
+.admin-head h3{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--ink);}
+.admin-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:4px;}
+.admin-body{padding:20px 24px;}
+.admin-section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:20px 0 12px;}
+.admin-form{display:flex;flex-direction:column;gap:10px;background:var(--surface);border-radius:10px;padding:16px;margin-bottom:16px;}
+.admin-form label{font-size:11px;font-weight:700;color:var(--ink);letter-spacing:.3px;text-transform:uppercase;}
+.admin-form input,.admin-form select,.admin-form textarea{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;background:white;}
+.admin-form input:focus,.admin-form select:focus,.admin-form textarea:focus{border-color:var(--ink);}
+.admin-form textarea{min-height:70px;resize:vertical;}
+.btn-add{background:#2C2C2C;color:white;border:none;padding:11px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;transition:opacity .2s;}
+.btn-add:hover{opacity:.85;}
+.admin-tag-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;}
+.admin-tag-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:8px;font-size:13px;}
+.admin-tag-item .ati-name{flex:1;font-weight:600;color:var(--ink);}
+.admin-tag-item .ati-letter{font-family:'Sora',sans-serif;font-size:11px;font-weight:800;width:20px;text-align:center;color:var(--muted);}
+.btn-del{background:var(--red2);border:none;color:var(--red);padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;}
+.admin-search{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;margin-bottom:10px;}
+.admin-search:focus{border-color:var(--ink);}
+.admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;}
+.admin-overlay.open{display:block;}
+
+/* ── MODAL ── */
+.tag-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:8000;align-items:center;justify-content:center;padding:20px;}
+.tag-modal.open{display:flex;}
+.tag-modal-box{background:white;border-radius:16px;width:90%;max-width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,0.25);}
+.tmb-head{padding:22px 26px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:1;}
+.tmb-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-right:12px;flex-shrink:0;}
+.tmb-title{font-family:'Sora',sans-serif;font-size:18px;font-weight:800;color:var(--ink);}
+.tmb-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);}
+.tmb-body{padding:24px 26px;}
+.tmb-stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+.tmb-stat{background:var(--surface);border-radius:10px;padding:14px;text-align:center;}
+.tmb-stat-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--ink);}
+.tmb-stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;}
+.tmb-holdings{margin-bottom:20px;}
+.tmb-holding-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.tmb-holding-row:last-child{border-bottom:none;}
+.tmb-h-left{display:flex;align-items:center;gap:10px;}
+.tmb-h-icon{width:28px;height:28px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.tmb-h-sym{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--ink);}
+.tmb-h-name{font-size:12px;color:var(--muted);}
+.tmb-h-price{font-family:'DM Mono',monospace;font-size:13px;color:var(--ink);}
+.tmb-h-chg{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
+.tmb-h-chg.up{color:var(--green);}
+.tmb-h-chg.dn{color:var(--red);}
+.btn-trade{background:#2C2C2C;color:white;border:none;padding:13px;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;width:100%;transition:opacity .2s;}
+.btn-trade:hover{opacity:.85;}
+
+@media(max-width:768px){
+  .tags-grid{grid-template-columns:1fr;}
+  .tmb-stat-row{grid-template-columns:1fr 1fr;}
+  .admin-panel{width:100%;}
+}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- TICKER -->
+<div style="position:fixed;top:0;width:100%;z-index:600;background:var(--ink);overflow:hidden;padding:9px 0;">
+  <div class="ticker-inner" id="ticker-inner" style="display:flex;white-space:nowrap;animation:ticker 60s linear infinite;"></div>
+</div>
+
+<!-- NAV -->
+<nav class="orident-nav" style="top:36px;">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark"><svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19 Q8 10 14 8 Q20 6 26 10 Q32 14 32 19 Q32 24 26 28 Q20 32 14 30 Q8 28 6 19Z" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M8 19 C8 13.5 11.5 9.5 16 9.5 C20.5 9.5 23 13 23 19 C23 25 20.5 28.5 16 28.5 C11.5 28.5 8 24.5 8 19Z" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M13.5 10 C13 9 12.5 8 11.5 7.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"/><path d="M18 9.6 C18.5 8.5 19 7.8 19.5 7" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-linecap="round"/><path d="M13 28 C12.5 29.2 12 30 11 31" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"/><path d="M27 9.5 L27 28.5" stroke="white" stroke-width="2.8" stroke-linecap="round"/><path d="M25 10 L29 10" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M25 28.5 L29 28.5" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+    <span class="nav-logo-text">Orident<span>Inc</span></span>
+  </a>
+    <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="markets.html">Markets</a></li>
+    <li><a href="copy-trading.html">Copy Trading</a></li>
+    <li><a href="browse-tags.html" class="active">Browse Tags</a></li>
+  </ul>
+    <div class="nav-right">
+    <a href="login.html" class="btn-primary">Get Started →</a>
+  </div>
+</nav>
+
+<!-- PAGE CONTENT -->
+<div style="padding-top:104px;">
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="ph-label">🏷 Investment Discovery</div>
+    <h1>Browse Every Investment Tag</h1>
+    <p>Every sector, theme, asset class, strategy and market — organised A–Z. Find your investment thesis and start trading in seconds.</p>
+    <!-- SEARCH -->
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" type="text" id="search-input" placeholder="Search tags, sectors, themes, symbols…" oninput="filterTags()"/>
+    </div>
+    <div class="search-results-count" id="results-count"></div>
+  </div>
+
+  <!-- ALPHABET NAV -->
+  <div class="alpha-nav" id="alpha-nav"></div>
+
+  <!-- TAGS OUTPUT -->
+  <div id="tags-output"></div>
+
+</div>
+</div>
+
+<!-- TAG DETAIL MODAL -->
+<div class="tag-modal" id="tag-modal" onclick="if(event.target===this)closeModal()">
+  <div class="tag-modal-box">
+    <div class="tmb-head">
+      <div style="display:flex;align-items:center;gap:0;">
+        <div class="tmb-icon" id="modal-icon"></div>
+        <div>
+          <div class="tmb-title" id="modal-title"></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="modal-desc-short"></div>
+        </div>
+      </div>
+      <button class="tmb-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="tmb-body">
+      <div class="tmb-stat-row" id="modal-stats"></div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px;" id="modal-desc"></p>
+      <div class="tmb-holdings" id="modal-holdings"></div>
+      <button class="btn-trade" onclick="location.href='markets.html'">Trade These Stocks on Orident →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN OVERLAY -->
+<div class="admin-overlay" id="admin-overlay" onclick="closeAdmin()"></div>
+
+<!-- ADMIN FAB -->
+<button class="admin-fab" id="admin-fab" onclick="toggleAdmin()" title="Admin: Manage Tags" style="display:none;">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+</button>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-head">
+    <h3>⚙️ Tag Manager</h3>
+    <button class="admin-close" onclick="closeAdmin()">✕</button>
+  </div>
+  <div class="admin-body">
+    <div style="background:#FFF8E6;border:1px solid #F5D77A;border-radius:8px;padding:12px 14px;font-size:12px;color:#7A5800;margin-bottom:16px;">
+      Changes save instantly and update the live page in real time.
+    </div>
+
+    <!-- ADD TAG FORM -->
+    <div class="admin-section-title">Add New Tag</div>
+    <div class="admin-form">
+      <label>Tag Name *</label>
+      <input type="text" id="new-tag-name" placeholder="e.g. Quantum Computing"/>
+      <label>Short Description *</label>
+      <textarea id="new-tag-desc" placeholder="One-line description of this investment theme…"></textarea>
+      <label>Category / Badge</label>
+      <select id="new-tag-badge">
+        <option value="theme">Theme</option>
+        <option value="sector">Sector</option>
+        <option value="stocks">Stocks & ETFs</option>
+        <option value="crypto">Crypto</option>
+        <option value="forex">Forex</option>
+        <option value="commodity">Commodity</option>
+        <option value="index">Index</option>
+        <option value="reit">REIT</option>
+        <option value="etf">ETF</option>
+        <option value="macro">Macro / Strategy</option>
+      </select>
+      <label>Key Symbols (comma separated)</label>
+      <input type="text" id="new-tag-syms" placeholder="e.g. NVDA, AMD, INTC"/>
+      <label>Icon (emoji)</label>
+      <input type="text" id="new-tag-icon" placeholder="e.g. 🔬" maxlength="4"/>
+      <label>Icon Background Color</label>
+      <input type="color" id="new-tag-color" value="#F0F0F0" style="height:36px;padding:2px 6px;"/>
+      <button class="btn-add" onclick="addTag()">+ Add Tag</button>
+    </div>
+
+    <!-- SEARCH EXISTING -->
+    <div class="admin-section-title">Manage Existing Tags (<span id="admin-count">0</span>)</div>
+    <input class="admin-search" type="text" placeholder="Search tags…" oninput="renderAdminList(this.value)"/>
+    <div class="admin-tag-list" id="admin-tag-list"></div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+// ── CHECK ADMIN ──────────────────────────────────────────────────
+const isAdmin = localStorage.getItem('orident_admin_logged_in') === 'true';
+if(isAdmin) document.getElementById('admin-fab').style.display = 'flex';
+
+// ── MASTER TAG DATABASE ─────────────────────────────────────────
+const DEFAULT_TAGS = [
+  // A
+  {id:'aerospace',letter:'A',name:'Aerospace & Defence',desc:'Commercial aviation, military defence, space exploration. Boeing, Lockheed, SpaceX suppliers.',icon:'🛸',color:'#E8F0FF',badge:'sector',syms:['BA','LMT','NOC','RTX','KTOS']},
+  {id:'ai',letter:'A',name:'Artificial Intelligence',desc:'Foundation models, AI infrastructure, LLMs, AI software and chips powering the intelligence revolution.',icon:'🤖',color:'#F0F0F0',badge:'theme',syms:['NVDA','MSFT','GOOGL','PLTR','AI']},
+  {id:'ai-agents',letter:'A',name:'AI Agents',desc:'Autonomous software agents, agentic AI workflows, next-gen automation replacing human tasks at scale.',icon:'🦾',color:'#E8E8E8',badge:'theme',syms:['MSFT','NVDA','AI','SOUN','GOOG']},
+  {id:'agriculture',letter:'A',name:'Agriculture & Food Tech',desc:'Precision farming, agri-biotech, food supply chain, vertical farming, and crop science innovations.',icon:'🌾',color:'#F0FFE8',badge:'sector',syms:['DE','ADM','APPH','CF','MOS']},
+  {id:'altcoins',letter:'A',name:'Altcoins',desc:'Major non-Bitcoin cryptocurrencies. Ethereum, Solana, Cardano and the broader altcoin market.',icon:'🔮',color:'#F0E8FF',badge:'crypto',syms:['ETH','SOL','ADA','AVAX','DOT']},
+  {id:'asset-management',letter:'A',name:'Asset Management',desc:'BlackRock, Vanguard, Fidelity and the fee-driven businesses that manage the world\'s capital.',icon:'🏦',color:'#E8F5FF',badge:'sector',syms:['BLK','BAM','IVZ','AMG','BEN']},
+  {id:'autonomous-vehicles',letter:'A',name:'Autonomous Vehicles',desc:'Self-driving technology, lidar sensors, AV software stacks, and the companies betting on driverless futures.',icon:'🚘',color:'#F0F0F0',badge:'theme',syms:['TSLA','MOBILEYE','LAZR','INVZ','NXPI']},
+
+  // B
+  {id:'banking',letter:'B',name:'Banking & Financial Services',desc:'Retail, commercial and investment banking. Interest-rate sensitive. JPMorgan, Bank of America, Citi.',icon:'🏛',color:'#E8F0FF',badge:'sector',syms:['JPM','BAC','C','WFC','GS']},
+  {id:'biotech',letter:'B',name:'Biotech & Life Sciences',desc:'Drug discovery, clinical-stage biopharmaceuticals, genetic medicines, and protein engineering.',icon:'🧬',color:'#E6FFF0',badge:'sector',syms:['MRNA','BIIB','REGN','VRTX','GILD']},
+  {id:'bitcoin',letter:'B',name:'Bitcoin',desc:'The original and largest cryptocurrency by market cap. Digital gold narrative, institutional adoption.',icon:'₿',color:'#FFF5E6',badge:'crypto',syms:['BTC']},
+  {id:'blockchain',letter:'B',name:'Blockchain & Web3',desc:'Distributed ledger technology, decentralised protocols, tokenisation of real-world assets.',icon:'⛓',color:'#F0E8FF',badge:'theme',syms:['COIN','MARA','RIOT','HUT','BTC']},
+  {id:'bond-proxies',letter:'B',name:'Bond Proxies',desc:'Defensive dividend stocks that behave like bonds — utilities, telecoms, consumer staples.',icon:'📜',color:'#F5F5F5',badge:'macro',syms:['JNJ','PG','KO','T','VZ']},
+  {id:'brics',letter:'B',name:'BRICS Markets',desc:'Brazil, Russia, India, China, South Africa — emerging market exposure across major developing economies.',icon:'🌍',color:'#FFF0E8',badge:'macro',syms:['EWZ','INDA','FXI','EZA','MCHI']},
+
+  // C
+  {id:'clean-energy',letter:'C',name:'Clean Energy',desc:'Solar, wind, hydrogen, grid-scale storage and the energy transition buildout. Long-duration tailwinds.',icon:'☀️',color:'#FFFAE6',badge:'theme',syms:['ENPH','FSLR','SEDG','NEE','PLUG']},
+  {id:'cloud',letter:'C',name:'Cloud Computing',desc:'Infrastructure-as-a-service, SaaS, platform cloud. AWS, Azure, Google Cloud dominate; pure-plays grow.',icon:'☁️',color:'#E8F0FF',badge:'theme',syms:['MSFT','AMZN','GOOGL','CRM','SNOW']},
+  {id:'commodities',letter:'C',name:'Commodities',desc:'Hard and soft commodities — gold, silver, oil, natural gas, copper, wheat. Inflation hedges and cycle plays.',icon:'⚙️',color:'#FFF8E6',badge:'commodity',syms:['XAUUSD','XAGUSD','WTIUSD','NATGAS','COPPER']},
+  {id:'consumer-discretionary',letter:'C',name:'Consumer Discretionary',desc:'Luxury goods, retail, restaurants, autos, entertainment. Cyclical exposure to consumer spending.',icon:'🛍',color:'#FFE8F5',badge:'sector',syms:['AMZN','TSLA','NKE','MCD','SBUX']},
+  {id:'consumer-staples',letter:'C',name:'Consumer Staples',desc:'Non-cyclical essentials — food, beverages, household products. Defensive positioning in down markets.',icon:'🧴',color:'#F0FFE8',badge:'sector',syms:['PG','KO','PEP','WMT','COST']},
+  {id:'copper',letter:'C',name:'Copper & Base Metals',desc:'Industrial metals critical for electrification, EV batteries, renewable infrastructure. Demand mega-trend.',icon:'🔶',color:'#FFF0E0',badge:'commodity',syms:['COPPER','FCX','SCCO','BHP','RIO']},
+  {id:'crispr',letter:'C',name:'CRISPR & Gene Editing',desc:'Base editing, prime editing, and CRISPR-Cas9 therapies. First FDA-approved gene editing drugs now live.',icon:'✂️',color:'#E6FFF0',badge:'theme',syms:['CRSP','BEAM','EDIT','NTLA','VERVE']},
+  {id:'crypto',letter:'C',name:'Cryptocurrency',desc:'Digital assets across Bitcoin, Ethereum, Solana, altcoins and the broader crypto ecosystem.',icon:'🪙',color:'#FFF5E0',badge:'crypto',syms:['BTC','ETH','SOL','BNB','XRP']},
+  {id:'cybersecurity',letter:'C',name:'Cybersecurity',desc:'Endpoint protection, zero-trust networks, SIEM, cloud security. Growing threat landscape drives spend.',icon:'🛡',color:'#E8F0FF',badge:'theme',syms:['CRWD','PANW','ZS','S','OKTA']},
+
+  // D
+  {id:'data-centres',letter:'D',name:'Data Centres & Infrastructure',desc:'Hyperscale and edge data centre REITs and operators. The physical backbone of the cloud and AI.',icon:'🖥',color:'#F0F0F0',badge:'reit',syms:['EQIX','DLR','AMT','CCI','IRM']},
+  {id:'defence',letter:'D',name:'Defence & Military Tech',desc:'Defence primes, drones, cybersecurity contractors, space defence. Geopolitical spending tailwinds.',icon:'🎯',color:'#E8F0FF',badge:'sector',syms:['LMT','RTX','NOC','KTOS','PLTR']},
+  {id:'developing-markets',letter:'D',name:'Developing Markets',desc:'High-growth emerging market equity exposure — India, Southeast Asia, Latin America, Africa.',icon:'🌱',color:'#E6FFE8',badge:'macro',syms:['INDA','EWZ','EEM','VWO','FM']},
+  {id:'dividend-growth',letter:'D',name:'Dividend Growth',desc:'Companies with 10+ years of consecutive dividend increases. Compounding income for long-term investors.',icon:'💵',color:'#F0FFE8',badge:'macro',syms:['JNJ','PG','KO','MMM','T']},
+  {id:'dow-jones',letter:'D',name:'Dow Jones Industrial Average',desc:'The 30 largest blue-chip US companies. Oldest major stock index. Price-weighted, iconic benchmark.',icon:'📈',color:'#F0F0F0',badge:'index',syms:['DJI','AAPL','MSFT','JPM','V']},
+
+  // E
+  {id:'e-commerce',letter:'E',name:'E-Commerce',desc:'Online retail, marketplaces, payments and logistics. Amazon, Shopify, Mercado Libre dominate globally.',icon:'🛒',color:'#FFF8E6',badge:'theme',syms:['AMZN','SHOP','MELI','BABA','JD']},
+  {id:'electric-vehicles',letter:'E',name:'Electric Vehicles',desc:'EV makers, battery tech, charging infrastructure, drivetrain components — the auto transition.',icon:'⚡',color:'#FFFAE6',badge:'theme',syms:['TSLA','RIVN','NIO','LCID','CHPT']},
+  {id:'emerging-markets',letter:'E',name:'Emerging Markets',desc:'Broad EM equity exposure including BRICS, Southeast Asia, Middle East and frontier markets.',icon:'🌏',color:'#E6F5FF',badge:'macro',syms:['EEM','VWO','IEMG','EMB','GXC']},
+  {id:'energy',letter:'E',name:'Energy',desc:'Oil & gas exploration, production, midstream pipelines, and downstream refining. Cycle-driven sector.',icon:'🛢',color:'#FFF5E0',badge:'sector',syms:['XOM','CVX','COP','SLB','EOG']},
+  {id:'esports',letter:'E',name:'Esports & Gaming',desc:'Video game publishers, competitive gaming platforms, streaming, and the metaverse gaming ecosystem.',icon:'🎮',color:'#F0E8FF',badge:'theme',syms:['MSFT','EA','TTWO','RBLX','U']},
+  {id:'etfs',letter:'E',name:'ETFs & Index Funds',desc:'Passive vehicles tracking indices, sectors, and themes. SPY, QQQ, IWM and thematic ETF universe.',icon:'📦',color:'#F5F5F5',badge:'etf',syms:['SPY','QQQ','IWM','DIA','VOO']},
+  {id:'europe',letter:'E',name:'European Equities',desc:'Eurozone and UK stock exposure. DAX, FTSE, CAC 40. Strong industrials, luxury goods, pharma.',icon:'🇪🇺',color:'#E8F0FF',badge:'macro',syms:['FTSE','DAX','EZU','VGK','IEUR']},
+  {id:'eurusd',letter:'E',name:'EUR/USD',desc:'The world\'s most traded forex pair. Euro vs. US Dollar. ECB and Fed policy divergence key driver.',icon:'€',color:'#E8F0FF',badge:'forex',syms:['EUR/USD']},
+
+  // F
+  {id:'fintech',letter:'F',name:'Fintech',desc:'Digital payments, neobanks, buy-now-pay-later, embedded finance, blockchain payments, robo-advisory.',icon:'💳',color:'#E8F0FF',badge:'theme',syms:['PYPL','SQ','AFRM','SOFI','UPST']},
+  {id:'fixed-income',letter:'F',name:'Fixed Income & Bonds',desc:'Treasury bonds, corporate debt, municipal bonds, high-yield. Rate-sensitive income investments.',icon:'📋',color:'#F5F5F5',badge:'macro',syms:['TLT','HYG','LQD','AGG','BND']},
+  {id:'food-beverage',letter:'F',name:'Food & Beverage',desc:'Consumer food brands, beverage companies, food delivery, agri-processing. Staples + growth blend.',icon:'🍔',color:'#FFF5E6',badge:'sector',syms:['KO','PEP','MCD','SBUX','YUM']},
+  {id:'forex',letter:'F',name:'Forex',desc:'Foreign exchange — the $7.5 trillion daily market. Major, minor and exotic currency pairs.',icon:'💱',color:'#E8F0FF',badge:'forex',syms:['EUR/USD','GBP/USD','USD/JPY','USD/CHF','AUD/USD']},
+  {id:'ftse',letter:'F',name:'FTSE 100',desc:'The 100 largest UK-listed companies by market cap. Heavy weighting in mining, energy, and banking.',icon:'🇬🇧',color:'#FFE8E8',badge:'index',syms:['FTSE','BP','HSBA','AZN','SHEL']},
+  {id:'frontier-markets',letter:'F',name:'Frontier Markets',desc:'Pre-emerging — Vietnam, Bangladesh, Kazakhstan, Kenya. Highest growth potential, highest risk.',icon:'🗺',color:'#F0FFE8',badge:'macro',syms:['FM','VNM','KFYF','NGE','ALTS']},
+
+  // G
+  {id:'gbpusd',letter:'G',name:'GBP/USD (Cable)',desc:'British Pound vs US Dollar. "Cable" — the most liquid sterling pair. BoE and Fed rate dynamics.',icon:'£',color:'#FFE8E8',badge:'forex',syms:['GBP/USD']},
+  {id:'gene-therapy',letter:'G',name:'Gene Therapy',desc:'Viral vector delivery, in-vivo and ex-vivo gene correction. Rare disease focus. Sarepta, UniQure.',icon:'💉',color:'#E6FFF0',badge:'theme',syms:['SRPT','QURE','RARE','ARWR','CRSP']},
+  {id:'gold',letter:'G',name:'Gold',desc:'The ultimate store of value. Safe haven in uncertainty, inflation hedge, central bank reserve asset.',icon:'🥇',color:'#FFF8E0',badge:'commodity',syms:['XAUUSD','GLD','IAU','GDX','NEM']},
+  {id:'growth-stocks',letter:'G',name:'Growth Stocks',desc:'High revenue growth, typically high valuation multiples. Tech-heavy, reinvestment-focused, long duration.',icon:'🚀',color:'#F0E8FF',badge:'macro',syms:['NVDA','MSFT','META','AMZN','GOOGL']},
+
+  // H
+  {id:'healthcare',letter:'H',name:'Healthcare',desc:'Hospitals, managed care, medical devices, pharma distribution. Defensive growth with aging demographics.',icon:'🏥',color:'#E6FFF0',badge:'sector',syms:['UNH','JNJ','ABT','TMO','SYK']},
+  {id:'hedge-fund-favorites',letter:'H',name:'Hedge Fund Favourites',desc:'Most widely held positions by top 13F-filing hedge funds. Where smart money concentrates.',icon:'🏆',color:'#F5F0FF',badge:'macro',syms:['MSFT','GOOGL','AMZN','META','NVDA']},
+  {id:'high-yield',letter:'H',name:'High-Yield Bonds',desc:'Sub-investment-grade corporate bonds offering higher yields in exchange for credit risk.',icon:'📊',color:'#FFF5E6',badge:'macro',syms:['HYG','JNK','ANGL','HYXU','SJNK']},
+  {id:'hong-kong',letter:'H',name:'Hong Kong / Hang Seng',desc:'Hong Kong equities — Hang Seng Index. Gateway to China, strong financials and tech names.',icon:'🇭🇰',color:'#FFE8E8',badge:'macro',syms:['EWH','FXI','MCHI','KWEB','HSI']},
+  {id:'hydrogen',letter:'H',name:'Hydrogen Energy',desc:'Green and blue hydrogen production, fuel cells, electrolysers. Long-term decarbonisation play.',icon:'⚗️',color:'#E8F5FF',badge:'theme',syms:['PLUG','BE','FCEL','BLDP','ITM']},
+
+  // I
+  {id:'india',letter:'I',name:'India',desc:'The world\'s fastest-growing major economy. 1.4B consumers, infrastructure boom, tech hub.',icon:'🇮🇳',color:'#FFF5E0',badge:'macro',syms:['INDA','INDY','PIN','NIFTY','INFU']},
+  {id:'industrials',letter:'I',name:'Industrials',desc:'Machinery, transportation, aerospace, construction. Economic cycle indicator. Caterpillar, GE, Honeywell.',icon:'🏗',color:'#F5F5F5',badge:'sector',syms:['HON','GE','CAT','UPS','DE']},
+  {id:'inflation-hedge',letter:'I',name:'Inflation Hedges',desc:'TIPS, commodities, real assets, REITs, gold. Assets that preserve purchasing power in inflationary regimes.',icon:'📈',color:'#FFF8E6',badge:'macro',syms:['XAUUSD','TIPS','BTC','REIT','DJP']},
+  {id:'infrastructure',letter:'I',name:'Infrastructure',desc:'Roads, airports, ports, utilities, telecom towers. Long-duration cash flows, inflation-linked revenues.',icon:'🌉',color:'#F0F5FF',badge:'sector',syms:['BIP','INFRA','AMT','CCI','AWK']},
+  {id:'insurance',letter:'I',name:'Insurance',desc:'P&C, life, reinsurance and specialty insurance. Underwriting cycle, float investing, Berkshire model.',icon:'🛡',color:'#F5F5FF',badge:'sector',syms:['BRK.B','AIG','MET','ALL','CB']},
+  {id:'internet',letter:'I',name:'Internet & Digital Media',desc:'Search, social, e-commerce, streaming, digital advertising. Platforms with dominant network effects.',icon:'🌐',color:'#E8F0FF',badge:'theme',syms:['GOOGL','META','AMZN','NFLX','SNAP']},
+  {id:'ionq',letter:'I',name:'IonQ & Quantum Tech',desc:'Quantum computing hardware and software. IonQ, Rigetti, IBM Quantum. Decade-long thesis.',icon:'⚛️',color:'#E8F5FF',badge:'theme',syms:['IONQ','RGTI','IBM','QUBT','QBTS']},
+
+  // J
+  {id:'japan',letter:'J',name:'Japan — Nikkei 225',desc:'Japanese equities. World\'s third-largest economy. Nikkei, Toyota, Sony, SoftBank. BOJ policy driven.',icon:'🇯🇵',color:'#FFE8E8',badge:'macro',syms:['N225','EWJ','DXJ','HEWJ','NTT']},
+  {id:'junk-bonds',letter:'J',name:'Junk Bonds & Distressed',desc:'High-yield and distressed debt. Recession signal — spread widening precedes equities by 3–6 months.',icon:'⚠️',color:'#FFF5E6',badge:'macro',syms:['HYG','JNK','BKLN','SHYG','PHB']},
+
+  // K
+  {id:'korea',letter:'K',name:'South Korea — KOSPI',desc:'Samsung, SK Hynix, Hyundai, POSCO. Heavy semiconductor, EV battery, industrial concentration.',icon:'🇰🇷',color:'#E8F0FF',badge:'macro',syms:['EWY','SKM','005930','000660','KOSPI']},
+
+  // L
+  {id:'latin-america',letter:'L',name:'Latin America',desc:'Brazil, Mexico, Chile, Colombia — commodity exporters with growing consumer class. High beta to China.',icon:'🌎',color:'#FFF0E8',badge:'macro',syms:['EWZ','EWW','ECH','GXG','ILF']},
+  {id:'lithium',letter:'L',name:'Lithium & Battery Metals',desc:'Lithium, cobalt, manganese, nickel. EV battery supply chain. Critical minerals race.',icon:'🔋',color:'#E8F5FF',badge:'commodity',syms:['ALB','SQM','LTHM','LAC','LIVENT']},
+  {id:'long-short',letter:'L',name:'Long/Short Equity',desc:'Hedge-fund style — long winners, short losers. Market-neutral alpha generation across cycles.',icon:'↕️',color:'#F5F5F5',badge:'macro',syms:['SPY','QQQ','MSFT','TSLA','GME']},
+  {id:'luxury',letter:'L',name:'Luxury Goods',desc:'LVMH, Hermès, Richemont, Burberry. Aspirational consumption from global HNWI growth.',icon:'💎',color:'#F5E8FF',badge:'sector',syms:['LVMH','RMS','CFR','BRBY','RL']},
+
+  // M
+  {id:'materials',letter:'M',name:'Materials & Mining',desc:'Metals, chemicals, paper, packaging. Cyclical demand from construction, autos, and manufacturing.',icon:'⛏',color:'#F5F5E8',badge:'sector',syms:['BHP','RIO','FCX','NEM','VALE']},
+  {id:'mena',letter:'M',name:'Middle East & North Africa',desc:'Saudi Arabia, UAE, Qatar, Egypt. Oil-linked sovereign wealth, Vision 2030 diversification plays.',icon:'🌍',color:'#FFF5E0',badge:'macro',syms:['KSA','UAE','QAT','GULF','MSCI_GCC']},
+  {id:'metaverse',letter:'M',name:'Metaverse & XR',desc:'Virtual reality, augmented reality, mixed reality, spatial computing. Apple Vision Pro, Meta Quest.',icon:'🥽',color:'#F0E8FF',badge:'theme',syms:['META','AAPL','U','MTTR','IMMR']},
+  {id:'momentum',letter:'M',name:'Momentum Stocks',desc:'High-relative-strength stocks. Price momentum factor — buy what\'s going up, cut what\'s going down.',icon:'⚡',color:'#FFF8E6',badge:'macro',syms:['NVDA','META','MSFT','AMZN','GOOGL']},
+  {id:'mrna',letter:'M',name:'mRNA Therapeutics',desc:'Moderna, BioNTech — mRNA vaccines now extended to oncology, rare diseases, flu, HIV treatments.',icon:'💊',color:'#E6FFF0',badge:'theme',syms:['MRNA','BNTX','ARCT','CVAC','SARS']},
+
+  // N
+  {id:'nasdaq',letter:'N',name:'NASDAQ 100 (NDX)',desc:'100 largest non-financial Nasdaq-listed companies. Most tech-heavy of the major indices.',icon:'💻',color:'#E8F0FF',badge:'index',syms:['NDX','QQQ','NVDA','MSFT','AAPL']},
+  {id:'natural-gas',letter:'N',name:'Natural Gas',desc:'LNG exports, pipeline gas, winter demand spikes. Transition fuel as coal declines globally.',icon:'🔥',color:'#FFF5E6',badge:'commodity',syms:['NATGAS','LNG','AR','EQT','BOIL']},
+  {id:'nifty',letter:'N',name:'Nifty 50 — India',desc:'India\'s premier 50-stock benchmark. Reliance, Infosys, HDFC Bank. Fastest-growing major index.',icon:'🇮🇳',color:'#FFF5E0',badge:'index',syms:['INDA','NSEI','INFY','RIL','HDFC']},
+  {id:'nuclear',letter:'N',name:'Nuclear Energy',desc:'Uranium miners, reactor operators, SMR developers. AI data centre energy demand reviving nuclear.',icon:'☢️',color:'#FFF8E6',badge:'theme',syms:['CCJ','NNE','LEU','BWXT','SMR']},
+
+  // O
+  {id:'oil-gas',letter:'O',name:'Oil & Gas',desc:'Exploration and production, integrated majors, refiners, pipelines. OPEC+ and geopolitics key.',icon:'🛢',color:'#FFF5E0',badge:'sector',syms:['XOM','CVX','COP','SLB','OXY']},
+  {id:'oncology',letter:'O',name:'Oncology',desc:'Cancer immunotherapy, CAR-T, ADC drugs, precision oncology. Largest pharma pipeline segment.',icon:'🔬',color:'#E6FFF0',badge:'theme',syms:['MRNA','BMY','MRK','REGN','SGEN']},
+  {id:'options',letter:'O',name:'Options & Derivatives',desc:'Equity options, futures, structured products. Volatility trades, hedging strategies, income generation.',icon:'📊',color:'#F5F5FF',badge:'macro',syms:['VIX','SPY','QQQ','UVXY','SVXY']},
+
+  // P
+  {id:'palantir',letter:'P',name:'Palantir & AI Analytics',desc:'AI-driven data analytics platforms. Palantir, C3.ai, SoundHound — AI software beyond hyperscalers.',icon:'🔭',color:'#F0F0F0',badge:'theme',syms:['PLTR','AI','SOUN','BBAI','AITX']},
+  {id:'payments',letter:'P',name:'Payments & Transactions',desc:'Card networks, payment processors, digital wallets. Visa, Mastercard, PayPal, Stripe adjacents.',icon:'💳',color:'#E8F0FF',badge:'theme',syms:['V','MA','PYPL','SQ','ADYEN']},
+  {id:'pharma',letter:'P',name:'Pharmaceuticals',desc:'Drug development and commercialisation — large-cap pharma with blockbuster drugs and pipelines.',icon:'💊',color:'#E6FFF0',badge:'sector',syms:['PFE','JNJ','LLY','MRK','BMY']},
+  {id:'private-equity',letter:'P',name:'Private Equity',desc:'Publicly listed PE firms — KKR, Apollo, Blackstone, Carlyle. Fee income + carry from fund management.',icon:'🏦',color:'#F5E8FF',badge:'macro',syms:['BX','KKR','APO','CG','TPG']},
+
+  // Q
+  {id:'quantum',letter:'Q',name:'Quantum Computing',desc:'Quantum processors, algorithms, and the nascent quantum internet. 10-year horizon, multi-billion TAM.',icon:'⚛️',color:'#E8F5FF',badge:'theme',syms:['IONQ','RGTI','IBM','QBTS','QUBT']},
+
+  // R
+  {id:'real-estate',letter:'R',name:'Real Estate & REITs',desc:'Residential, commercial, industrial and speciality REITs. Income + inflation protection.',icon:'🏠',color:'#E6F5FF',badge:'reit',syms:['VNQ','O','SPG','PLD','EQIX']},
+  {id:'reits-industrial',letter:'R',name:'Industrial REITs',desc:'Logistics warehouses, data centres, manufacturing facilities. E-commerce and nearshoring tailwinds.',icon:'🏭',color:'#E6F5FF',badge:'reit',syms:['PLD','STAG','EGP','LXP','TRNO']},
+  {id:'renewables',letter:'R',name:'Renewables & Clean Tech',desc:'Solar, wind, hydro, geothermal, battery storage. The energy transition multi-decade investment cycle.',icon:'🌱',color:'#E6FFE8',badge:'theme',syms:['NEE','ENPH','FSLR','RUN','SPWR']},
+  {id:'robotics',letter:'R',name:'Robotics & Automation',desc:'Industrial robots, collaborative robots, surgical robots, autonomous systems. Labour replacement wave.',icon:'🤖',color:'#F0F0F0',badge:'theme',syms:['ISRG','ABB','FANUY','IRBT','TER']},
+
+  // S
+  {id:'saas',letter:'S',name:'SaaS & Cloud Software',desc:'Subscription-based software. High recurring revenue, net revenue retention, Rule of 40 metrics.',icon:'💿',color:'#E8F0FF',badge:'theme',syms:['CRM','SNOW','PLTR','NOW','DDOG']},
+  {id:'semiconductors',letter:'S',name:'Semiconductors',desc:'Logic chips, memory, EUV lithography, fabless design. The foundational layer of all modern technology.',icon:'🔲',color:'#FFF5E0',badge:'sector',syms:['NVDA','AMD','TSM','ASML','INTC']},
+  {id:'singapore',letter:'S',name:'Singapore',desc:'DBS, OCBC, Grab, Sea Limited. Asia\'s financial hub — stable, innovative, USD-pegged currency.',icon:'🇸🇬',color:'#E8F5FF',badge:'macro',syms:['EWS','D05','GRAB','SE','U11']},
+  {id:'silver',letter:'S',name:'Silver',desc:'Industrial metal and precious metal hybrid. Solar panel demand, EV connectors, photovoltaics.',icon:'🥈',color:'#F5F5F5',badge:'commodity',syms:['XAGUSD','SLV','PSLV','AG','PAAS']},
+  {id:'snp500',letter:'S',name:'S&P 500 (SPX)',desc:'The 500 largest US companies by market cap. The world\'s most watched equity benchmark.',icon:'📈',color:'#F0F0F0',badge:'index',syms:['SPX','SPY','VOO','IVV','SCHB']},
+  {id:'space',letter:'S',name:'Space Economy',desc:'Satellite operators, launch companies, space tourism, defence space. $1 trillion economy by 2040.',icon:'🚀',color:'#E8E8FF',badge:'theme',syms:['SPCE','ASTS','RKLB','MAXR','BA']},
+  {id:'spacs',letter:'S',name:'SPACs & Special Situations',desc:'Blank-check companies, merger arbs, spin-offs and special situations for event-driven investors.',icon:'🎯',color:'#F5F5F5',badge:'macro',syms:['PSTH','AJAX','SOAC','DCRB','IPOF']},
+
+  // T
+  {id:'taiwan',letter:'T',name:'Taiwan — TSMC',desc:'TSMC dominates semiconductor manufacturing. Taiwan plays critical role in global tech supply chain.',icon:'🇹🇼',color:'#FFE8E8',badge:'macro',syms:['TSM','EWT','ACER','UMC','ASX']},
+  {id:'tech',letter:'T',name:'Technology',desc:'The broadest tech exposure — hardware, software, internet, semiconductors, AI. Mega-cap driven.',icon:'💻',color:'#E8F0FF',badge:'sector',syms:['AAPL','MSFT','NVDA','GOOGL','META']},
+  {id:'telecom',letter:'T',name:'Telecommunications',desc:'Mobile carriers, fibre networks, satellite communications. Dividend-heavy, infrastructure-like returns.',icon:'📡',color:'#F0F5FF',badge:'sector',syms:['VZ','T','TMUS','VOD','AMX']},
+  {id:'thematic-etfs',letter:'T',name:'Thematic ETFs',desc:'ARK funds, Invesco, iShares thematic. Targeted exposure to AI, genomics, clean energy, blockchain.',icon:'📦',color:'#F5F5F5',badge:'etf',syms:['ARKK','ARKW','ARKG','BOTZ','ROBO']},
+  {id:'treasury',letter:'T',name:'Treasury Bonds (US)',desc:'US government debt. 2yr, 5yr, 10yr, 30yr — the global risk-free rate benchmark.',icon:'🏛',color:'#F5F5F5',badge:'macro',syms:['TLT','IEF','SHY','TMF','TBT']},
+
+  // U
+  {id:'uae',letter:'U',name:'UAE & Gulf',desc:'Dubai, Abu Dhabi — Emaar, ADNOC, DP World. Vision economies pivoting from oil to diversification.',icon:'🇦🇪',color:'#FFF5E0',badge:'macro',syms:['UAE','ADX','DFM','ENBD','ADNOC']},
+  {id:'uranium',letter:'U',name:'Uranium',desc:'Nuclear fuel cycle. Cameco, Sprott Physical Uranium — supply deficit meets AI data centre demand.',icon:'☢️',color:'#FFF8E6',badge:'commodity',syms:['CCJ','URA','SRUUF','DNN','UUUU']},
+  {id:'us-dollar',letter:'U',name:'US Dollar (DXY)',desc:'Dollar index tracking USD against major currencies. Fed policy, safe-haven flows, global reserve currency.',icon:'$',color:'#F5F5F5',badge:'forex',syms:['DXY','UUP','USDU','USD/JPY','EUR/USD']},
+  {id:'utilities',letter:'U',name:'Utilities',desc:'Electric, gas, water utilities. Regulated monopolies, bond proxies, AI data centre power demand.',icon:'⚡',color:'#FFF8E6',badge:'sector',syms:['NEE','DUK','SO','AEP','EXC']},
+
+  // V
+  {id:'value-stocks',letter:'V',name:'Value Stocks',desc:'Low P/E, P/B, P/CF stocks. Contrarian positioning in beaten-down sectors. Buffett-style philosophy.',icon:'💰',color:'#F5F0FF',badge:'macro',syms:['BRK.B','WFC','C','JPM','BAC']},
+  {id:'vix',letter:'V',name:'Volatility (VIX)',desc:'CBOE Volatility Index — the market\'s fear gauge. Spikes during crashes. Options-derived 30-day IV.',icon:'📉',color:'#FFE8E8',badge:'index',syms:['VIX','UVXY','SVXY','VXX','VIXM']},
+  {id:'vietnam',letter:'V',name:'Vietnam',desc:'Southeast Asia\'s fastest-growing manufacturer. Supply chain diversification from China driving FDI.',icon:'🇻🇳',color:'#FFE8E8',badge:'macro',syms:['VNM','VNINDEX','FPT','VNZ','MSN']},
+
+  // W
+  {id:'water',letter:'W',name:'Water & Environmental',desc:'Water utilities, treatment, infrastructure. Scarce resource with demographic tailwinds.',icon:'💧',color:'#E8F5FF',badge:'sector',syms:['AWK','XYL','WTS','MSEX','CWCO']},
+  {id:'wti',letter:'W',name:'WTI Crude Oil',desc:'West Texas Intermediate — US benchmark crude. OPEC+ production cuts, recession fears, dollar sensitivity.',icon:'🛢',color:'#FFF5E0',badge:'commodity',syms:['WTIUSD','USO','UCO','SCO','XLE']},
+
+  // X
+  {id:'xr-tech',letter:'X',name:'XR & Spatial Computing',desc:'Extended reality — VR, AR, MR. Apple Vision Pro era beginning. Niche to mainstream pipeline.',icon:'🥽',color:'#F0E8FF',badge:'theme',syms:['AAPL','META','U','MANU','IMMR']},
+
+  // Y
+  {id:'yield-curve',letter:'Y',name:'Yield Curve & Rates',desc:'2yr/10yr spread, inversion signals, Fed funds futures. Macro positioning around rate cycles.',icon:'📊',color:'#F5F5F5',badge:'macro',syms:['TLT','SHY','IEF','TBT','TMF']},
+
+  // Z
+  {id:'zero-carbon',letter:'Z',name:'Zero-Carbon Economy',desc:'Net-zero transition plays — carbon credits, green hydrogen, nuclear, offshore wind, carbon capture.',icon:'🌿',color:'#E6FFE8',badge:'theme',syms:['NEE','PLUG','NNE','CCJ','ENPH']},
+];
+
+// ── STATE ────────────────────────────────────────────────────────
+function getTags(){
+  try{
+    const saved = localStorage.getItem('orident_tags');
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_TAGS));
+}
+function saveTags(tags){ localStorage.setItem('orident_tags', JSON.stringify(tags)); }
+
+let TAGS = getTags();
+let currentFilter = '';
+
+// ── LETTER NAV BUILD ─────────────────────────────────────────────
+function buildAlphaNav(){
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const existing = new Set(TAGS.map(t => t.letter));
+  const nav = document.getElementById('alpha-nav');
+  nav.innerHTML = letters.map(l => `
+    <button class="alpha-btn ${existing.has(l)?'has-tags':''}" 
+      data-letter="${l}"
+      onclick="scrollToLetter('${l}')">
+      ${l}
+    </button>
+  `).join('') + `<button class="alpha-btn has-tags" onclick="scrollToAll()" style="padding:0 10px;font-size:11px;letter-spacing:.5px;">ALL</button>`;
+}
+
+function scrollToLetter(l){
+  if(currentFilter){ currentFilter=''; document.getElementById('search-input').value=''; filterTags(); }
+  const el = document.getElementById('letter-'+l);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  document.querySelectorAll('.alpha-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`[data-letter="${l}"]`)?.classList.add('active');
+}
+
+function scrollToAll(){
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.querySelectorAll('.alpha-btn').forEach(b=>b.classList.remove('active'));
+}
+
+// ── RENDER ───────────────────────────────────────────────────────
+function render(filterStr=''){
+  const q = filterStr.toLowerCase();
+  const filtered = TAGS.filter(t =>
+    !q ||
+    t.name.toLowerCase().includes(q) ||
+    (t.desc||'').toLowerCase().includes(q) ||
+    (t.syms||[]).some(s=>s.toLowerCase().includes(q)) ||
+    t.badge.toLowerCase().includes(q) ||
+    t.letter.toLowerCase().includes(q)
+  );
+
+  const countEl = document.getElementById('results-count');
+  if(q) countEl.textContent = `${filtered.length} tag${filtered.length!==1?'s':''} matching "${filterStr}"`;
+  else countEl.textContent = `${TAGS.length} tags across all markets, sectors & themes`;
+
+  // Group by letter
+  const byLetter = {};
+  filtered.forEach(t => {
+    if(!byLetter[t.letter]) byLetter[t.letter] = [];
+    byLetter[t.letter].push(t);
+  });
+
+  const out = document.getElementById('tags-output');
+  if(!filtered.length){
+    out.innerHTML = `<div class="no-results">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:6px;">No tags found</div>
+      <div style="font-size:13px;">Try a different keyword or <a href="#" onclick="clearSearch()" style="color:var(--ink);font-weight:600;">clear search</a></div>
+    </div>`;
+    return;
+  }
+
+  out.innerHTML = Object.keys(byLetter).sort().map(letter => `
+    <div class="letter-section" id="letter-${letter}">
+      <div class="letter-header">
+        <span class="letter-char">${letter}</span>
+        <span class="letter-count">${byLetter[letter].length} tag${byLetter[letter].length!==1?'s':''}</span>
+      </div>
+      <div class="tags-grid">
+        ${byLetter[letter].map(tag => renderTagCard(tag)).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // Animate live prices
+  updateLivePrices();
+}
+
+function renderTagCard(tag){
+  const leadSym = (tag.syms||[])[0];
+  const asset = findAsset(leadSym);
+  const price = asset ? (asset.price > 100 ? '$'+fmt(asset.price) : '$'+fmt(asset.price,4)) : '—';
+  const pct = asset ? asset.pct : 0;
+  const isUp = pct >= 0;
+
+  return `<div class="tag-card" onclick="openModal('${tag.id}')">
+    <div class="tag-card-top">
+      <div class="tag-icon" style="background:${tag.color||'#F0F0F0'}">${tag.icon||'📌'}</div>
+      <div class="tag-name">${tag.name}</div>
+      <span class="tag-badge badge-${tag.badge}">${tag.badge}</span>
+    </div>
+    <div class="tag-desc">${tag.desc||''}</div>
+    <div class="tag-stocks">
+      ${(tag.syms||[]).slice(0,5).map(s=>`<span class="tag-sym">${s}</span>`).join('')}
+    </div>
+    <div class="tag-live">
+      <span class="tag-price" id="price-${tag.id}">${price}</span>
+      <span class="tag-chg ${isUp?'up':'dn'}" id="chg-${tag.id}">${isUp?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span>
+    </div>
+  </div>`;
+}
+
+// ── LIVE PRICES ──────────────────────────────────────────────────
+function findAsset(sym){
+  if(!sym) return null;
+  const all = [
+    ...ASSETS.stocks, ...ASSETS.crypto, ...ASSETS.forex,
+    ...ASSETS.indices, ...ASSETS.commodities, ...ASSETS.reits,
+    ...ASSETS.realestate, ...ASSETS.ai_biotech
+  ];
+  return all.find(a => a.sym === sym) || null;
+}
+
+function fmt(n, dec=2){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+
+function updateLivePrices(){
+  TAGS.forEach(tag => {
+    const priceEl = document.getElementById('price-'+tag.id);
+    const chgEl = document.getElementById('chg-'+tag.id);
+    if(!priceEl || !chgEl) return;
+    const asset = findAsset((tag.syms||[])[0]);
+    if(!asset) return;
+    const price = asset.price > 100 ? '$'+fmt(asset.price) : '$'+fmt(asset.price,4);
+    const pct = asset.pct;
+    const isUp = pct >= 0;
+    priceEl.textContent = price;
+    chgEl.textContent = (isUp?'▲':'▼')+' '+Math.abs(pct).toFixed(2)+'%';
+    chgEl.className = 'tag-chg ' + (isUp?'up':'dn');
+  });
+}
+
+document.addEventListener('prices:update', updateLivePrices);
+
+// ── SEARCH ───────────────────────────────────────────────────────
+function filterTags(){
+  currentFilter = document.getElementById('search-input').value.trim();
+  render(currentFilter);
+}
+function clearSearch(){
+  currentFilter = '';
+  document.getElementById('search-input').value = '';
+  render();
+}
+
+// ── MODAL ────────────────────────────────────────────────────────
+function openModal(id){
+  const tag = TAGS.find(t => t.id === id);
+  if(!tag) return;
+
+  document.getElementById('modal-icon').style.background = tag.color || '#F0F0F0';
+  document.getElementById('modal-icon').textContent = tag.icon || '📌';
+  document.getElementById('modal-title').textContent = tag.name;
+  document.getElementById('modal-desc-short').textContent = tag.badge.toUpperCase() + ' · ' + (tag.syms||[]).length + ' symbols';
+  document.getElementById('modal-desc').textContent = tag.desc || '';
+
+  // Stats
+  const syms = tag.syms || [];
+  const assets = syms.slice(0,5).map(s => findAsset(s)).filter(Boolean);
+  const avgPct = assets.length ? assets.reduce((a,b)=>a+b.pct,0)/assets.length : 0;
+  const bestPct = assets.length ? Math.max(...assets.map(a=>a.pct)) : 0;
+
+  document.getElementById('modal-stats').innerHTML = `
+    <div class="tmb-stat">
+      <div class="tmb-stat-val">${syms.length}</div>
+      <div class="tmb-stat-lbl">Symbols</div>
+    </div>
+    <div class="tmb-stat">
+      <div class="tmb-stat-val" style="color:${avgPct>=0?'var(--green)':'var(--red)'}">${avgPct>=0?'+':''}${avgPct.toFixed(2)}%</div>
+      <div class="tmb-stat-lbl">Avg Change</div>
+    </div>
+    <div class="tmb-stat">
+      <div class="tmb-stat-val" style="color:${bestPct>=0?'var(--green)':'var(--red)'}">${bestPct>=0?'+':''}${bestPct.toFixed(2)}%</div>
+      <div class="tmb-stat-lbl">Best Performer</div>
+    </div>
+  `;
+
+  // Holdings
+  document.getElementById('modal-holdings').innerHTML = `
+    <div style="font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px;">Live Holdings</div>
+    ${syms.slice(0,8).map(sym => {
+      const a = findAsset(sym);
+      const price = a ? (a.price>100?'$'+fmt(a.price):'$'+fmt(a.price,4)) : '—';
+      const pct = a ? a.pct : 0;
+      const isUp = pct >= 0;
+      // Asset icon from ASSET_ICONS if available
+      const iconHtml = typeof getAssetIcon !== 'undefined' ? getAssetIcon(sym) : sym[0];
+      return `<div class="tmb-holding-row">
+        <div class="tmb-h-left">
+          <div class="tmb-h-icon">${iconHtml}</div>
+          <div>
+            <div class="tmb-h-sym">${sym}</div>
+            <div class="tmb-h-name">${a&&a.name?a.name:sym}</div>
+          </div>
+        </div>
+        <div>
+          <div class="tmb-h-price">${price}</div>
+          <div class="tmb-h-chg ${isUp?'up':'dn'}">${isUp?'+':''}${pct.toFixed(2)}%</div>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+
+  document.getElementById('tag-modal').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('tag-modal').classList.remove('open');
+}
+
+// ── ADMIN ────────────────────────────────────────────────────────
+function toggleAdmin(){
+  document.getElementById('admin-panel').classList.toggle('open');
+  document.getElementById('admin-overlay').classList.toggle('open');
+  renderAdminList();
+}
+function closeAdmin(){
+  document.getElementById('admin-panel').classList.remove('open');
+  document.getElementById('admin-overlay').classList.remove('open');
+}
+
+function renderAdminList(q=''){
+  const list = document.getElementById('admin-tag-list');
+  const filtered = TAGS.filter(t => !q || t.name.toLowerCase().includes(q.toLowerCase()) || t.letter.includes(q.toUpperCase()));
+  document.getElementById('admin-count').textContent = TAGS.length;
+  list.innerHTML = filtered.map(t => `
+    <div class="admin-tag-item">
+      <span class="ati-letter">${t.letter}</span>
+      <span style="font-size:16px;">${t.icon||'📌'}</span>
+      <span class="ati-name">${t.name}</span>
+      <span style="font-size:10px;color:var(--muted);">${(t.syms||[]).slice(0,2).join(', ')}</span>
+      <button class="btn-del" onclick="deleteTag('${t.id}')">Remove</button>
+    </div>
+  `).join('') || '<div style="font-size:13px;color:var(--muted);padding:12px;">No tags found.</div>';
+}
+
+function addTag(){
+  const name = document.getElementById('new-tag-name').value.trim();
+  const desc = document.getElementById('new-tag-desc').value.trim();
+  const badge = document.getElementById('new-tag-badge').value;
+  const symsRaw = document.getElementById('new-tag-syms').value.trim();
+  const icon = document.getElementById('new-tag-icon').value.trim() || '📌';
+  const color = document.getElementById('new-tag-color').value;
+
+  if(!name){ showToast('Tag name is required','error','⚠️'); return; }
+  const letter = name[0].toUpperCase();
+  const id = name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-');
+  const syms = symsRaw ? symsRaw.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean) : [];
+
+  if(TAGS.find(t=>t.id===id)){ showToast('A tag with this name already exists','error','⚠️'); return; }
+
+  const newTag = {id, letter, name, desc, badge, syms, icon, color};
+  TAGS.push(newTag);
+  TAGS.sort((a,b) => a.letter.localeCompare(b.letter) || a.name.localeCompare(b.name));
+  saveTags(TAGS);
+
+  // Clear form
+  ['new-tag-name','new-tag-desc','new-tag-syms','new-tag-icon'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('new-tag-color').value='#F0F0F0';
+
+  render(currentFilter);
+  buildAlphaNav();
+  renderAdminList();
+  showToast(`"${name}" added to Browse Tags!`,'success','✅');
+}
+
+function deleteTag(id){
+  const tag = TAGS.find(t=>t.id===id);
+  if(!tag) return;
+  if(!confirm(`Remove "${tag.name}" from Browse Tags?`)) return;
+  TAGS = TAGS.filter(t=>t.id!==id);
+  saveTags(TAGS);
+  render(currentFilter);
+  buildAlphaNav();
+  renderAdminList();
+  showToast(`"${tag.name}" removed`,'success','🗑️');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildAlphaNav();
+  render();
+  buildTicker();
+
+  // Intersection observer — highlight active letter in nav
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        const letter = e.target.id.replace('letter-','');
+        document.querySelectorAll('.alpha-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelector(`[data-letter="${letter}"]`)?.classList.add('active');
+      }
+    });
+  }, {threshold: 0.3});
+
+  document.querySelectorAll('.letter-section').forEach(s => observer.observe(s));
+});
+</script>
+</body>
+</html>

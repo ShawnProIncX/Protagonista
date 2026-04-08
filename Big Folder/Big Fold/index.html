@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Orident Inc — The Future of Intelligent Investing</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+.hero-main{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;padding:100px 5% 80px;position:relative;z-index:2;min-height:calc(100vh - 104px);}
+/* HERO BACKDROP — Single full-bleed image */
+.hero-backdrop{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:0;
+}
+.hero-backdrop img{
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:center 30%;
+  display:block;
+  filter:grayscale(20%) brightness(0.72) contrast(1.08) saturate(0.85);
+}
+.hero-backdrop-overlay{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:
+    linear-gradient(
+      to right,
+      rgba(248,248,248,0.97) 0%,
+      rgba(248,248,248,0.93) 22%,
+      rgba(248,248,248,0.78) 42%,
+      rgba(248,248,248,0.38) 65%,
+      rgba(248,248,248,0.08) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(248,248,248,0.30) 0%,
+      rgba(248,248,248,0.0) 20%,
+      rgba(248,248,248,0.0) 75%,
+      rgba(248,248,248,0.45) 100%
+    );
+  z-index:1;
+  pointer-events:none;
+}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid rgba(26,107,255,0.2);color:var(--ink);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:24px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+h1.hero-h1{font-family:'Sora',sans-serif;font-size:clamp(2.2rem,4vw,3.4rem);font-weight:800;color:var(--ink);line-height:1.1;margin-bottom:20px;letter-spacing:-1px;}
+.accent{color:var(--ink);}
+.hero-sub{font-size:17px;color:var(--slate);line-height:1.7;margin-bottom:36px;max-width:480px;}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
+.hero-trust{display:flex;gap:20px;flex-wrap:wrap;}
+.trust-item{font-size:13px;color:var(--muted);font-weight:500;}
+.market-card{background:white;border:1px solid var(--border);border-radius:20px;padding:24px;box-shadow:var(--shadow3);}
+.mc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.mc-title{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;}
+.mc-live{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green);}
+.mrow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.mrow:last-child{border-bottom:none;}
+.mrow-l{display:flex;align-items:center;gap:10px;}
+.mrow-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:'DM Mono',monospace;}
+.mrow-name{font-size:13px;font-weight:600;color:var(--ink);}
+.mrow-sub{font-size:11px;color:var(--muted);}
+.mrow-price{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;text-align:right;}
+.mrow-chg{font-size:11px;text-align:right;}
+.mrow-chg.up{color:var(--green);}
+.mrow-chg.dn{color:var(--red);}
+.stats-strip{background:var(--ink);padding:40px 5%;}
+.stats-inner{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center;}
+.stat-n{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;color:white;letter-spacing:-1px;}
+.stat-l{font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px;}
+.sec{padding:80px 5%;}
+.sec-inner{max-width:1140px;margin:0 auto;}
+.sec-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--ink);margin-bottom:8px;}
+.sec-title{font-family:'Sora',sans-serif;font-size:clamp(1.7rem,3vw,2.4rem);font-weight:800;color:var(--ink);line-height:1.2;margin-bottom:12px;letter-spacing:-0.5px;}
+.sec-title em{color:var(--ink);font-style:normal;}
+.sec-sub{font-size:16px;color:var(--muted);max-width:520px;line-height:1.7;margin-bottom:40px;}
+.asset-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;}
+.asset-tab{padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;color:var(--slate);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.asset-tab.active,.asset-tab:hover{background:#3A3A3A;color:white;border-color:var(--ink);}
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.ac{background:white;border:1px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s;}
+.ac:hover{border-color:var(--ink);box-shadow:var(--shadow2);transform:translateY(-2px);}
+.ac-sym{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink);margin-bottom:4px;}
+.ac-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ac-price{font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px;}
+.fc{padding:32px 26px;border:1px solid var(--border);border-radius:var(--r);transition:all .2s;position:relative;overflow:hidden;}
+.fc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#3A3A3A,#666);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.fc:hover{box-shadow:var(--shadow2);transform:translateY(-3px);}
+.fc:hover::before{transform:scaleX(1);}
+.fc-icon{font-size:28px;margin-bottom:16px;}
+.fc-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;}
+.fc-text{font-size:13px;color:var(--muted);line-height:1.75;}
+.re-section{padding:80px 5%;background:var(--ink);}
+.re-section .sec-title{color:white;}
+.re-section .sec-label{color:var(--slate);}
+.re-section .sec-sub{color:rgba(255,255,255,0.5);}
+.re-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:40px;}
+.rec{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r);padding:22px;cursor:pointer;transition:all .2s;}
+.rec:hover{background:rgba(26,107,255,0.1);border-color:rgba(26,107,255,0.4);}
+.rec-city{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:white;margin-bottom:2px;}
+.rec-state{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:14px;}
+.rec-price{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--slate);}
+.rec-label{font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px;}
+.rec-foot{display:flex;justify-content:space-between;align-items:center;}
+.copy-section{padding:80px 5%;background:var(--surface);}
+.traders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;margin-top:40px;}
+.trc{background:white;border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:all .2s;}
+.trc:hover{box-shadow:var(--shadow2);transform:translateY(-2px);}
+.trc-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.trc-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;font-family:'Sora',sans-serif;}
+.trc-name{font-weight:700;color:var(--ink);font-size:14px;}
+.trc-handle{font-size:12px;color:var(--muted);}
+.trc-rank{margin-left:auto;background:var(--gold2);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;}
+.trc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.trc-sl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:3px;}
+.trc-sv{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--ink);}
+.trc-sv.up{color:var(--green);}
+.testi-section{padding:80px 5%;}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px;}
+.tec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;}
+.tec:hover{box-shadow:var(--shadow2);}
+.tec-stars{color:var(--gold);margin-bottom:14px;}
+.tec-text{font-size:14px;color:var(--ink2);line-height:1.8;margin-bottom:18px;}
+.tec-auth{display:flex;align-items:center;gap:10px;}
+.tec-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:var(--surface);color:var(--ink);}
+.cta-sec{padding:90px 5%;background:linear-gradient(135deg,#2C2C2C 0%,#1A1A1A 100%);text-align:center;}
+.cta-sec h2{font-family:'Sora',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;color:white;margin-bottom:14px;letter-spacing:-1px;}
+.cta-sec p{font-size:16px;color:rgba(255,255,255,0.75);max-width:460px;margin:0 auto 32px;line-height:1.6;}
+.btn-white{background:white;color:var(--ink);padding:15px 34px;border-radius:10px;font-weight:800;font-size:15px;text-decoration:none;display:inline-block;transition:all .2s;}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,0.2);}
+footer{background:var(--ink);padding:56px 5% 28px;}
+.footer-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;max-width:1140px;margin:0 auto 40px;}
+.footer-brand-p{font-size:13px;color:rgba(255,255,255,0.4);margin-top:12px;line-height:1.7;max-width:250px;}
+.footer-col h5{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:14px;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-col ul a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;transition:color .2s;}
+.footer-col ul a:hover{color:white;}
+.footer-bottom{max-width:1140px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.07);padding-top:22px;display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.28);}
+.risk-note{max-width:1140px;margin:0 auto 28px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:14px 18px;font-size:12px;color:rgba(255,255,255,0.3);line-height:1.6;}
+@media(max-width:900px){.hero-main{grid-template-columns:1fr;padding:40px 5%;}.stats-inner{grid-template-columns:repeat(2,1fr);}.features-grid,.testi-grid{grid-template-columns:1fr;}.footer-g{grid-template-columns:1fr 1fr;}}
+
+/* ── INSIGHT CARDS ── */
+.insight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:36px;}
+.insight-card{background:white;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:box-shadow .2s,transform .2s;}
+.insight-card:hover{box-shadow:var(--shadow2);transform:translateY(-4px);}
+.insight-img{width:100%;height:160px;object-fit:cover;display:block;filter:grayscale(15%)brightness(0.92);}
+.insight-body{padding:20px;}
+.insight-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:4px;margin-bottom:12px;}
+.insight-tag.ai{background:var(--surface2);color:var(--ink2);}
+.insight-tag.semi{background:#FFF8E6;color:#8A6000;}
+.insight-tag.bio{background:#E6F7F0;color:#0A6640;}
+.insight-title{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);line-height:1.4;margin-bottom:8px;}
+.insight-text{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px;}
+.insight-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);}
+
+/* ── THEMATIC SECTORS ── */
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px;}
+.theme-card{border-radius:var(--r);padding:28px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s;}
+.theme-card:hover{transform:translateY(-3px);}
+.theme-card.ai-theme{background:linear-gradient(135deg,#0F0F0F 0%,#1A1A1A 100%);}
+.theme-card.semi-theme{background:linear-gradient(135deg,#1A1200 0%,#2A2000 100%);}
+.theme-card.bio-theme{background:linear-gradient(135deg,#001A0D 0%,#002818 100%);}
+.theme-card-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.theme-card.ai-theme .theme-card-label{color:rgba(255,255,255,0.45);}
+.theme-card.semi-theme .theme-card-label{color:rgba(255,220,100,0.55);}
+.theme-card.bio-theme .theme-card-label{color:rgba(100,220,150,0.55);}
+.theme-card-title{font-family:'Sora',sans-serif;font-size:20px;font-weight:800;color:white;margin-bottom:12px;line-height:1.2;}
+.theme-card-desc{font-size:13px;line-height:1.7;margin-bottom:18px;}
+.theme-card.ai-theme .theme-card-desc{color:rgba(255,255,255,0.55);}
+.theme-card.semi-theme .theme-card-desc{color:rgba(255,220,100,0.5);}
+.theme-card.bio-theme .theme-card-desc{color:rgba(100,220,150,0.5);}
+.theme-stocks{display:flex;gap:6px;flex-wrap:wrap;}
+.theme-stock{font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px;}
+.theme-card.ai-theme .theme-stock{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);}
+.theme-card.semi-theme .theme-stock{background:rgba(255,220,100,0.12);color:rgba(255,220,100,0.8);}
+.theme-card.bio-theme .theme-stock{background:rgba(100,220,150,0.12);color:rgba(100,220,150,0.8);}
+.theme-perf{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:white;margin-top:16px;}
+.theme-perf-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px;}
+
+/* ── COMMUNITY HUB ── */
+.community-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:32px;}
+.comm-card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;transition:box-shadow .2s;}
+.comm-card:hover{box-shadow:var(--shadow);}
+.comm-region{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.comm-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px;}
+.comm-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.comm-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;margin-top:8px;background:var(--surface2);color:var(--slate);}
+
+/* ── NEWSLETTER SIGNUP ── */
+.newsletter-sec{background:linear-gradient(135deg,#0F0F0F,#1A1A1A);padding:64px 5%;text-align:center;}
+.newsletter-sec h2{font-family:'Sora',sans-serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:white;margin-bottom:10px;}
+.newsletter-sec p{font-size:15px;color:rgba(255,255,255,0.55);max-width:520px;margin:0 auto 28px;line-height:1.7;}
+.nl-form{display:flex;gap:10px;max-width:440px;margin:0 auto;flex-wrap:wrap;justify-content:center;}
+.nl-input{flex:1;min-width:220px;padding:13px 16px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.08);color:white;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.nl-input::placeholder{color:rgba(255,255,255,0.3);}
+.nl-btn{padding:13px 24px;background:white;color:var(--ink);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.nl-btn:hover{opacity:.88;}
+.nl-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.nl-tag{font-size:11px;padding:3px 10px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);}
+
+@media(max-width:900px){
+  .insight-grid,.theme-grid{grid-template-columns:1fr;}
+  .community-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .community-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- TICKER TAPE -->
+<div style="position:fixed;top:0;width:100%;z-index:600;background:var(--ink);overflow:hidden;padding:9px 0;">
+  <div class="ticker-inner" id="ticker-inner" style="display:flex;white-space:nowrap;animation:ticker 60s linear infinite;"></div>
+</div>
+
+<!-- NAV -->
+<nav class="orident-nav" style="top:36px;">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark"><svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19 Q8 10 14 8 Q20 6 26 10 Q32 14 32 19 Q32 24 26 28 Q20 32 14 30 Q8 28 6 19Z" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M8 19 C8 13.5 11.5 9.5 16 9.5 C20.5 9.5 23 13 23 19 C23 25 20.5 28.5 16 28.5 C11.5 28.5 8 24.5 8 19Z" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M13.5 10 C13 9 12.5 8 11.5 7.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"/><path d="M18 9.6 C18.5 8.5 19 7.8 19.5 7" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-linecap="round"/><path d="M13 28 C12.5 29.2 12 30 11 31" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"/><path d="M27 9.5 L27 28.5" stroke="white" stroke-width="2.8" stroke-linecap="round"/><path d="M25 10 L29 10" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M24.5 9.5 C24 8.5 23.5 8 23 7.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29.5 9.5 C30 8.5 30.5 8 31 7" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M25 28.5 L29 28.5" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M25 29 C24.5 30 24 30.8 23.2 31.5" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29 29 C29.5 30 30 31 30.8 31.8" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M22 15 C24 14.5 26 14.8 27 15" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/><path d="M22 23 C24 23.2 26 23.1 27 23" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/></svg></div>
+    <span class="nav-logo-text">Orident<span>Inc</span></span>
+  </a>
+    <ul class="nav-links">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="markets.html">Markets</a></li>
+    <li><a href="copy-trading.html">Copy Trading</a></li>
+    <li><a href="browse-tags.html">Browse Tags</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#community">Community</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+    <div class="nav-right">
+    <a href="login.html" class="btn-primary">Get Started →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="padding-top:104px;position:relative;overflow:hidden;">
+
+<!-- BACKDROP: US SEC Headquarters — Washington DC -->
+<div class="hero-backdrop">
+  <img
+    src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=2400&q=95"
+    alt="Financial District — SEC Headquarters Washington DC"
+    loading="eager"
+    fetchpriority="high"
+  />
+</div>
+<div class="hero-backdrop-overlay"></div>
+
+<div class="hero-main">
+  <div>
+    <div class="hero-eyebrow"><div class="live-dot"></div>Live Markets · 8 Asset Classes · Real-Time Data</div>
+    <h1 class="hero-h1">The Future of<br/><span style="color:#111;font-style:italic;">Intelligent</span><br/>Investing</h1>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:#4A4A4A;color:white;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;margin-bottom:16px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5Z"/></svg>
+      AI-Powered Quant Tools for Trading
+    </div>
+    <p class="hero-sub">Trade Stocks, Crypto, Forex, Options, Real Estate, Indices, Commodities, AI & Biotech — all from one powerful platform.</p>
+    <div class="hero-ctas">
+      <a href="login.html" class="btn-primary" style="padding:14px 30px;font-size:15px;">Start Investing Free →</a>
+      <a href="markets.html" class="btn-ghost" style="padding:14px 22px;font-size:15px;">Explore Markets</a>
+    </div>
+    <div class="hero-trust">
+      <span class="trust-item">🔒 256-bit SSL</span>
+      <span class="trust-item">⚡ Real-Time Prices</span>
+      <span class="trust-item">🌍 180+ Countries</span>
+      <span class="trust-item">🤖 AI-Powered</span>
+    </div>
+  </div>
+  <div class="market-card">
+    <div class="mc-header">
+      <div class="mc-title">Live Market Snapshot</div>
+      <div class="mc-live"><div class="live-dot"></div>LIVE</div>
+    </div>
+    <div id="live-rows"></div>
+    <a href="markets.html" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--ink);font-weight:600;text-decoration:none;">View All Markets →</a>
+  </div>
+</div>
+</div><!-- end hero backdrop wrapper -->
+
+<!-- INSTITUTION TRUST STRIP -->
+<div style="background:white;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;padding:13px 5%;">
+  <div style="display:flex;gap:0;align-items:center;justify-content:center;flex-wrap:wrap;max-width:1140px;margin:0 auto;">
+    <span style="font-size:10px;color:#999;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0 20px;border-right:1px solid #ddd;white-space:nowrap;">Regulated Markets</span>
+    <span style="font-size:10px;color:#777;font-weight:600;letter-spacing:0.8px;padding:0 20px;border-right:1px solid #ddd;white-space:nowrap;">🏛 US SEC</span>
+    <span style="font-size:10px;color:#777;font-weight:600;letter-spacing:0.8px;padding:0 20px;border-right:1px solid #ddd;white-space:nowrap;">🌐 World Bank Group</span>
+    <span style="font-size:10px;color:#777;font-weight:600;letter-spacing:0.8px;padding:0 20px;border-right:1px solid #ddd;white-space:nowrap;">🇪🇺 ECB · Frankfurt</span>
+    <span style="font-size:10px;color:#777;font-weight:600;letter-spacing:0.8px;padding:0 20px;border-right:1px solid #ddd;white-space:nowrap;">🇬🇧 FCA · London</span>
+    <span style="font-size:10px;color:#777;font-weight:600;letter-spacing:0.8px;padding:0 20px;white-space:nowrap;">🗽 NYSE · Wall Street</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div><div class="stat-n">$2.4B+</div><div class="stat-l">Total Trade Volume</div></div>
+    <div><div class="stat-n">801K+</div><div class="stat-l">Active Investors</div></div>
+    <div><div class="stat-n">99.98%</div><div class="stat-l">Platform Uptime</div></div>
+    <div><div class="stat-n">8</div><div class="stat-l">Asset Classes</div></div>
+  </div>
+</div>
+
+<!-- MARKETS -->
+<section class="sec" style="background:var(--surface);" id="markets">
+<div class="sec-inner">
+  <div class="sec-label">All Markets</div>
+  <h2 class="sec-title">Trade Every <em>Asset Class</em></h2>
+  <p class="sec-sub">Stocks, Crypto, Forex, Real Estate, Indices, Commodities, AI & Biotech — one account, unlimited opportunity.</p>
+  <div class="asset-tabs">
+    <div class="asset-tab active" onclick="showAssets('stocks',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Stocks & ETFs</div>
+    <div class="asset-tab" onclick="showAssets('crypto',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 9h6.5a2 2 0 0 1 0 4H9v4h6.5a2 2 0 0 0 0-4M9 9V5m0 12v-3M9 5h5a2 2 0 0 1 0 4"/></svg> Crypto</div>
+    <div class="asset-tab" onclick="showAssets('forex',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 0 20M2 12h20"/></svg> Forex</div>
+    <div class="asset-tab" onclick="showAssets('indices',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Indices</div>
+    <div class="asset-tab" onclick="showAssets('commodities',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg> Commodities</div>
+    <div class="asset-tab" onclick="showAssets('reits',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> REITs</div>
+    <div class="asset-tab" onclick="showAssets('ai_biotech',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 0 20M8 7h8M8 12h8M8 17h8"/><circle cx="12" cy="12" r="10"/></svg> AI & Biotech</div>
+  </div>
+  <div class="asset-grid" id="asset-grid"></div>
+  <div style="text-align:center;margin-top:28px;"><a href="markets.html" class="btn-primary">View All Markets →</a></div>
+</div>
+</section>
+
+<!-- FEATURES -->
+<section class="sec" id="features">
+<div class="sec-inner">
+  <div class="sec-label">Why Orident Inc</div>
+  <h2 class="sec-title">Built for <em>Serious Investors</em></h2>
+  <p class="sec-sub">The same tools used by institutional desks — now accessible to every investor, anywhere in the world.</p>
+  <div class="features-grid">
+    <div class="fc"><div class="fc-icon">⚡</div><div class="fc-title">Real-Time Everything</div><div class="fc-text">Live streaming prices across all 8 asset classes simultaneously. Sub-second updates, no refresh needed.</div></div>
+    <div class="fc"><div class="fc-icon">🏠</div><div class="fc-title">Real Estate Markets</div><div class="fc-text">Trade city-level real estate price indexes — New York, London, Singapore, Dubai and 12 more. No property ownership needed.</div></div>
+    <div class="fc" style="border:1.5px solid #2C2C2C;background:#2C2C2C;"><div class="fc-icon">🤖</div><div class="fc-title" style="color:white;">AI Quant Signals</div><div class="fc-text" style="color:rgba(255,255,255,0.6);">Pattern recognition, momentum scoring, and AI-driven entry signals across every asset. The same quantitative edge hedge funds pay millions for.</div></div>
+    <div class="fc"><div class="fc-icon">🧬</div><div class="fc-title">Biotech & AI Sector</div><div class="fc-text">Dedicated thematic portfolios for AI infrastructure, gene editing, and semiconductor stocks. Trade CRSP, NVDA, IONQ and 20+ more.</div></div>
+    <div class="fc"><div class="fc-icon">🔒</div><div class="fc-title">Institutional Security</div><div class="fc-text">256-bit SSL, two-factor authentication, segregated client funds, and full KYC/AML compliance — bank-grade protection.</div></div>
+    <div class="fc"><div class="fc-icon">📊</div><div class="fc-title">Portfolio Analytics</div><div class="fc-text">Real-time P&L, risk exposure heatmaps, sector allocation breakdowns, and performance benchmarking against major indices.</div></div>
+  </div>
+</div>
+</section>
+
+<!-- THEMATIC SECTORS: AI · SEMICONDUCTORS · BIOTECH -->
+<section class="sec" id="themes" style="background:var(--surface);">
+<div class="sec-inner">
+  <div class="sec-label">Thematic Investing</div>
+  <h2 class="sec-title">Three Sectors Defining the <em>Next Decade</em></h2>
+  <p class="sec-sub">Orident gives you direct, portfolio-ready exposure to the most consequential investment themes of our era — with the research to back every position.</p>
+  <div class="theme-grid">
+
+    <div class="theme-card ai-theme" onclick="location.href='markets.html'">
+      <div class="theme-card-label">Theme 01 — Artificial Intelligence</div>
+      <div class="theme-card-title">The AI<br/>Infrastructure<br/>Buildout</div>
+      <div class="theme-card-desc">Data centres, GPU compute, foundation model companies, and AI software. The multi-trillion dollar infrastructure layer being built right now.</div>
+      <div class="theme-stocks">
+        <span class="theme-stock">NVDA</span>
+        <span class="theme-stock">PLTR</span>
+        <span class="theme-stock">MSFT</span>
+        <span class="theme-stock">GOOGL</span>
+        <span class="theme-stock">AI</span>
+        <span class="theme-stock">IONQ</span>
+      </div>
+      <div class="theme-perf">+186.4%</div>
+      <div class="theme-perf-label">AI basket · 24-month performance</div>
+    </div>
+
+    <div class="theme-card semi-theme" onclick="location.href='markets.html'">
+      <div class="theme-card-label">Theme 02 — Semiconductors</div>
+      <div class="theme-card-title">The Chip<br/>Sovereignty<br/>Race</div>
+      <div class="theme-card-desc">Advanced logic chips, memory, EUV lithography. Every government on earth is funding domestic semiconductor capacity. The geopolitical trade of the generation.</div>
+      <div class="theme-stocks">
+        <span class="theme-stock">NVDA</span>
+        <span class="theme-stock">AMD</span>
+        <span class="theme-stock">QCOM</span>
+        <span class="theme-stock">INTC</span>
+        <span class="theme-stock">SPX</span>
+      </div>
+      <div class="theme-perf" style="color:#FFD84D;">+94.2%</div>
+      <div class="theme-perf-label">Semis basket · 24-month performance</div>
+    </div>
+
+    <div class="theme-card bio-theme" onclick="location.href='markets.html'">
+      <div class="theme-card-label">Theme 03 — Biotech & Gene Editing</div>
+      <div class="theme-card-title">The Biology<br/>Revolution</div>
+      <div class="theme-card-desc">CRISPR gene editing, mRNA therapeutics, AI-designed drugs. Science that was impossible a decade ago is now generating FDA approvals and multi-billion valuations.</div>
+      <div class="theme-stocks">
+        <span class="theme-stock">CRSP</span>
+        <span class="theme-stock">BEAM</span>
+        <span class="theme-stock">MRNA</span>
+        <span class="theme-stock">RXRX</span>
+        <span class="theme-stock">EDIT</span>
+      </div>
+      <div class="theme-perf" style="color:#5DDC9A;">+128.7%</div>
+      <div class="theme-perf-label">Biotech basket · 24-month performance</div>
+    </div>
+
+  </div>
+  <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px;">Past performance is not indicative of future results. Baskets are illustrative. All figures simulated.</p>
+</div>
+</section>
+
+<!-- ORIDENT RESEARCH — FREE MARKET INSIGHTS -->
+<section class="sec" id="research">
+<div class="sec-inner">
+  <div class="sec-label">Orident Research</div>
+  <h2 class="sec-title">Free Weekly <em>Market Intelligence</em></h2>
+  <p class="sec-sub">We publish original market analysis — the same insights shared in SemiAnalysis circles, BioPharmCatalyst communities, and institutional research desks. Free, every week.</p>
+  <div class="insight-grid">
+
+    <div class="insight-card">
+      <img class="insight-img" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=85" alt="Semiconductor chip"/>
+      <div class="insight-body">
+        <div class="insight-tag semi">Semiconductors</div>
+        <div class="insight-title">Why TSMC's Arizona Fab Changes Everything for Western Investors</div>
+        <div class="insight-text">The geopolitical semiconductor race is creating asymmetric opportunities in chip stocks that most retail investors are missing entirely. Here's how to position.</div>
+        <div class="insight-meta">
+          <span>Orident Research Team</span>
+          <span>8 min read</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <img class="insight-img" src="https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=600&q=85" alt="AI neural network"/>
+      <div class="insight-body">
+        <div class="insight-tag ai">AI Infrastructure</div>
+        <div class="insight-title">The $500 Billion AI Capex Cycle: Who Wins Beyond NVDA</div>
+        <div class="insight-text">Microsoft, Google, Amazon and Meta have committed over $500B in AI infrastructure spending. The picks-and-shovels plays beyond Nvidia that benefit most.</div>
+        <div class="insight-meta">
+          <span>Orident Research Team</span>
+          <span>11 min read</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <img class="insight-img" src="https://images.unsplash.com/photo-1576086213369-97a306d36557?w=600&q=85" alt="Biotech laboratory"/>
+      <div class="insight-body">
+        <div class="insight-tag bio">Biotech</div>
+        <div class="insight-title">CRISPR at the Tipping Point: 3 Gene Editing Stocks Ahead of Key FDA Catalysts</div>
+        <div class="insight-text">CRSP, BEAM, and EDIT each have pivotal readouts in the next 18 months. Understanding the pipeline mechanics is the edge most investors lack.</div>
+        <div class="insight-meta">
+          <span>Orident Research Team</span>
+          <span>9 min read</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div style="text-align:center;margin-top:28px;">
+    <a href="login.html" class="btn-primary" style="margin-right:12px;">Read Full Reports →</a>
+    <a href="#newsletter" class="btn-ghost" style="padding:11px 22px;font-size:14px;">Get Weekly Digest Free</a>
+  </div>
+</div>
+</section>
+
+<!-- COMMUNITY HUB — WHERE ORIDENT INVESTORS CONNECT -->
+<section class="sec" id="community" style="background:var(--surface);">
+<div class="sec-inner">
+  <div class="sec-label">Investor Community</div>
+  <h2 class="sec-title">Where <em>Serious Investors</em> Find Orident</h2>
+  <p class="sec-sub">Our users come from the world's most rigorous investment communities. We're active participants — sharing insights, not just pitching. Here's where to find us and meet fellow investors.</p>
+  <div class="community-grid">
+
+    <div class="comm-card">
+      <div class="comm-region">🌎 Americas</div>
+      <div class="comm-name">r/SecurityAnalysis</div>
+      <div class="comm-desc">Institutional-grade investment thesis breakdowns. Where our AI and biotech portfolio write-ups are discussed.</div>
+      <div class="comm-tag">Reddit · Free</div>
+    </div>
+
+    <div class="comm-card">
+      <div class="comm-region">🌎 Americas</div>
+      <div class="comm-name">SemiAnalysis (Substack)</div>
+      <div class="comm-desc">The #1 semiconductor analysis community globally. Dylan Patel's research read by hedge funds worldwide.</div>
+      <div class="comm-tag">Substack · semianalysis.com</div>
+    </div>
+
+    <div class="comm-card">
+      <div class="comm-region">🌎 Americas</div>
+      <div class="comm-name">BioPharmCatalyst Discord</div>
+      <div class="comm-desc">Real-time biotech catalyst community. FDA calendars, PDUFA alerts, clinical readout discussions.</div>
+      <div class="comm-tag">Discord · biopharmcatalyst.com</div>
+    </div>
+
+    <div class="comm-card">
+      <div class="comm-region">🇪🇺 Europe</div>
+      <div class="comm-name">Lunar Ventures Network</div>
+      <div class="comm-desc">Berlin-based deep tech VC community. AI, biotech, hardware investors across Europe.</div>
+      <div class="comm-tag">VC Network · lunar.vc</div>
+    </div>
+
+    <div class="comm-card">
+      <div class="comm-region">🇪🇺 Europe</div>
+      <div class="comm-name">The Semiconductor Newsletter</div>
+      <div class="comm-desc">Weekly strategic analysis on European chip stocks, ASML, EU Chips Act investment implications.</div>
+      <div class="comm-tag">Substack · Free</div>
+    </div>
+
+    <div class="comm-card">
+      <div class="comm-region">🌏 Asia</div>
+      <div class="comm-name">Hubbis Wealth Community</div>
+      <div class="comm-desc">Singapore's premier HNW wealth community. Family offices and PMs investing in AI/biotech portfolios.</div>
+      <div class="comm-tag">Forum · hubbis.com</div>
+    </div>
+
+    <div class="comm-card">
+      <div class="comm-region">🌏 Asia</div>
+      <div class="comm-name">Founders Forum Asia</div>
+      <div class="comm-desc">Top Southeast Asian founders, VCs, and investors. AI and semiconductor deal flow, Singapore-based.</div>
+      <div class="comm-tag">Summit · Singapore</div>
+    </div>
+
+    <div class="comm-card">
+      <div class="comm-region">🌍 Middle East</div>
+      <div class="comm-name">DIFC FinTech Hive</div>
+      <div class="comm-desc">Dubai's flagship investor accelerator network. Gulf SWF and family office deal flow in AI and biotech.</div>
+      <div class="comm-tag">Network · Dubai</div>
+    </div>
+
+  </div>
+  <div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:24px 28px;margin-top:28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:240px;">
+      <div style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">Are you a community moderator or newsletter writer?</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;">We partner with investment communities to provide exclusive data, live market feeds, and co-branded research. Let's build something together.</div>
+    </div>
+    <a href="#contact" class="btn-primary" style="white-space:nowrap;">Partner With Us →</a>
+  </div>
+</div>
+</section>
+
+<!-- NEWSLETTER SIGNUP -->
+<section class="newsletter-sec" id="newsletter">
+  <div class="sec-label" style="color:rgba(255,255,255,0.4);">Orident Weekly</div>
+  <h2>Stay Ahead of AI, Semiconductors & Biotech</h2>
+  <p>Every Monday — one concise research brief covering the moves that matter across the three most consequential sectors. Read by investors in 40+ countries. Free, forever.</p>
+  <div class="nl-form">
+    <input class="nl-input" type="email" id="nl-email" placeholder="your@email.com"/>
+    <button class="nl-btn" onclick="nlSignup()">Subscribe Free →</button>
+  </div>
+  <div id="nl-confirm" style="display:none;margin-top:14px;font-size:13px;color:rgba(255,255,255,0.55);">✅ You're in — look out for your first issue next Monday.</div>
+  <div class="nl-tags">
+    <span class="nl-tag">AI Infrastructure</span>
+    <span class="nl-tag">Semiconductor Supply Chain</span>
+    <span class="nl-tag">Gene Editing & mRNA</span>
+    <span class="nl-tag">Portfolio Strategy</span>
+    <span class="nl-tag">Weekly Catalyst Calendar</span>
+  </div>
+</section>
+
+
+<!-- REAL ESTATE -->
+<section class="re-section">
+<div style="max-width:1140px;margin:0 auto;">
+  <div class="sec-label">Real Estate Markets</div>
+  <h2 class="sec-title" style="color:white;">Invest in City <em style="color:var(--slate)">Real Estate</em> Indexes</h2>
+  <p class="sec-sub">Trade real estate price indices by city — no property ownership needed. Pure price exposure, Parcl-style.</p>
+  <div class="re-grid" id="re-grid"></div>
+  <div style="text-align:center;margin-top:28px;"><a href="markets.html" class="btn-primary">View All Real Estate Markets →</a></div>
+</div>
+</section>
+
+<!-- COPY TRADING -->
+<section class="copy-section">
+<div style="max-width:1140px;margin:0 auto;">
+  <div class="sec-label">Copy Trading</div>
+  <h2 class="sec-title">Follow the Best. <em>Earn Like the Best.</em></h2>
+  <p class="sec-sub">Browse top-performing traders and auto-copy every trade they make.</p>
+  <div class="traders-grid" id="top-traders"></div>
+  <div style="text-align:center;margin-top:28px;"><a href="copy-trading.html" class="btn-primary">Explore All Traders →</a></div>
+</div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-section" id="about">
+<div style="max-width:1140px;margin:0 auto;">
+  <div class="sec-label">Client Reviews</div>
+  <h2 class="sec-title">Trusted by <em>Investors Worldwide</em></h2>
+  <p class="sec-sub">Real results from real clients across every asset class.</p>
+  <div class="testi-grid">
+    <div class="tec"><div class="tec-stars">★★★★★</div><p class="tec-text">"I've used 6 brokers over 10 years. Orident is on another level. The real estate market feature alone is worth it — made more in 3 months than the entire last year."</p><div class="tec-auth"><div class="tec-av">M</div><div><div style="font-weight:700;font-size:14px;">Marcus T.</div><div style="font-size:12px;color:var(--muted)">New York, USA</div></div></div></div>
+    <div class="tec"><div class="tec-stars">★★★★★</div><p class="tec-text">"The copy trading feature is genius. I set it to auto-copy the top trader and my portfolio grew 34% in two months. Completely hands-free investing."</p><div class="tec-auth"><div class="tec-av" style="background:var(--green2);color:var(--green)">S</div><div><div style="font-weight:700;font-size:14px;">Sophie L.</div><div style="font-size:12px;color:var(--muted)">Paris, France</div></div></div></div>
+    <div class="tec"><div class="tec-stars">★★★★★</div><p class="tec-text">"Having stocks, crypto, forex, REITs and AI stocks all in one dashboard is a game-changer. Orident does it all — I don't need 5 different apps anymore."</p><div class="tec-auth"><div class="tec-av" style="background:var(--purple2);color:var(--purple)">R</div><div><div style="font-weight:700;font-size:14px;">Ricardo S.</div><div style="font-size:12px;color:var(--muted)">São Paulo, Brazil</div></div></div></div>
+  </div>
+</div>
+</section>
+
+<!-- CTA -->
+<!-- REVIEWS -->
+<section class="sec" id="reviews" style="background:var(--surface);">
+<div class="sec-inner">
+  <div class="sec-label">Client Testimonials</div>
+  <h2 class="sec-title">Trusted by <em>801,000+ Investors</em></h2>
+  <p class="sec-sub">Real results, real people — across every asset class and every corner of the world.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;margin-top:8px;" id="reviews-grid"></div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:36px;margin-top:36px;flex-wrap:wrap;background:white;border:1px solid var(--border);border-radius:var(--r);padding:28px;">
+    <div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:2.4rem;font-weight:800;color:var(--ink);">4.9</div><div style="color:var(--gold);font-size:18px;margin:4px 0;">★★★★★</div><div style="font-size:13px;color:var(--muted);">Average Rating</div></div>
+    <div style="width:1px;height:56px;background:var(--border);"></div>
+    <div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:2.4rem;font-weight:800;color:var(--ink);">12,400+</div><div style="font-size:13px;color:var(--muted);margin-top:8px;">Verified Reviews</div></div>
+    <div style="width:1px;height:56px;background:var(--border);"></div>
+    <div style="text-align:center;"><div style="font-family:'Sora',sans-serif;font-size:2.4rem;font-weight:800;color:var(--green);">97.8%</div><div style="font-size:13px;color:var(--muted);margin-top:8px;">Would Recommend</div></div>
+  </div>
+</div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" id="faq">
+<div class="sec-inner">
+  <div class="sec-label">FAQ</div>
+  <h2 class="sec-title">Frequently Asked <em>Questions</em></h2>
+  <p class="sec-sub">Everything you need to know about trading on Orident Inc.</p>
+  <div style="max-width:800px;margin:0 auto;" id="faq-list"></div>
+</div>
+</section>
+
+<!-- BUSINESS HOURS & CONTACT -->
+<section class="sec" id="contact" style="background:var(--surface);">
+<div class="sec-inner">
+  <div class="sec-label">Support & Contact</div>
+  <h2 class="sec-title">We're Here <em>Mon – Fri</em></h2>
+  <p class="sec-sub">Our support team is available every business day. Leave a message anytime — we respond within 24 hours.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px;">
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:28px;">
+      <h3 style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:18px;">🕐 Business Hours</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--surface);border-radius:8px;font-size:13px;"><span style="font-weight:600;">Monday</span><span style="color:var(--green);font-weight:600;">9:00 AM – 6:00 PM EST</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--surface);border-radius:8px;font-size:13px;"><span style="font-weight:600;">Tuesday</span><span style="color:var(--green);font-weight:600;">9:00 AM – 6:00 PM EST</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--surface);border-radius:8px;font-size:13px;"><span style="font-weight:600;">Wednesday</span><span style="color:var(--green);font-weight:600;">9:00 AM – 6:00 PM EST</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--surface);border-radius:8px;font-size:13px;"><span style="font-weight:600;">Thursday</span><span style="color:var(--green);font-weight:600;">9:00 AM – 6:00 PM EST</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--surface);border-radius:8px;font-size:13px;"><span style="font-weight:600;">Friday</span><span style="color:var(--green);font-weight:600;">9:00 AM – 5:00 PM EST</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--surface);border-radius:8px;font-size:13px;opacity:.55;"><span style="font-weight:600;">Saturday</span><span style="color:var(--red);font-weight:600;">Closed</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--surface);border-radius:8px;font-size:13px;opacity:.55;"><span style="font-weight:600;">Sunday</span><span style="color:var(--red);font-weight:600;">Closed</span></div>
+      </div>
+      <div style="margin-top:16px;padding:12px 16px;background:var(--surface);border-radius:8px;font-size:13px;color:var(--ink);font-weight:600;">📧 Email: <span class="oi-email-reveal"></span> — replies within 24 hrs</div>
+    </div>
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:28px;">
+      <h3 style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:18px;">📬 Send Us a Message</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div><label style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:6px;">Your Name</label><input type="text" id="contact-name" placeholder="Full name" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'"/></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:6px;">Email Address</label><input type="email" id="contact-email" placeholder="you@example.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'"/></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:6px;">Message</label><textarea id="contact-msg" placeholder="How can we help you?" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;min-height:100px;resize:vertical;" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+        <button class="btn-primary" onclick="sendContactMsg()" style="width:100%;justify-content:center;padding:13px;">Send Message →</button>
+        <div id="contact-sent" style="display:none;background:var(--green2);color:var(--green);border-radius:8px;padding:12px;font-size:13px;font-weight:600;text-align:center;">✅ Message sent! We'll reply within 24 hours.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);padding:5px 14px;border-radius:16px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:18px;">
+    <div class="live-dot" style="background:white;"></div> 801,000+ investors · 40+ countries
+  </div>
+  <h2>Ready to Trade with an Edge?</h2>
+  <p>AI quant signals. CRISPR stocks. Semiconductor plays. Real estate indexes. All from one account — with the research to back every trade.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;">
+    <a href="login.html" class="btn-white">Create Free Account →</a>
+    <a href="#research" class="btn-ghost" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:11px 22px;font-size:14px;">Read Free Research</a>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:4px;">
+    <span style="font-size:12px;color:rgba(255,255,255,0.35);">✓ No minimum deposit</span>
+    <span style="font-size:12px;color:rgba(255,255,255,0.35);">✓ 8 asset classes</span>
+    <span style="font-size:12px;color:rgba(255,255,255,0.35);">✓ AI quant tools included</span>
+    <span style="font-size:12px;color:rgba(255,255,255,0.35);">✓ Weekly free research</span>
+  </div>
+  <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,0.3);">📧 <span class="oi-email-reveal"></span> · Mon–Fri 9AM–6PM EST</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="risk-note">⚠️ <strong style="color:rgba(255,255,255,0.5)">Risk Warning:</strong> Trading financial instruments carries significant risk. Past performance is not indicative of future results. Only invest what you can afford to lose. Please ensure you understand the risks involved before trading.</div>
+  <div class="footer-g">
+    <div>
+      <a href="index.html" class="nav-logo"><div class="nav-logo-mark"><svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19 Q8 10 14 8 Q20 6 26 10 Q32 14 32 19 Q32 24 26 28 Q20 32 14 30 Q8 28 6 19Z" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M8 19 C8 13.5 11.5 9.5 16 9.5 C20.5 9.5 23 13 23 19 C23 25 20.5 28.5 16 28.5 C11.5 28.5 8 24.5 8 19Z" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M13.5 10 C13 9 12.5 8 11.5 7.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"/><path d="M18 9.6 C18.5 8.5 19 7.8 19.5 7" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-linecap="round"/><path d="M13 28 C12.5 29.2 12 30 11 31" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"/><path d="M27 9.5 L27 28.5" stroke="white" stroke-width="2.8" stroke-linecap="round"/><path d="M25 10 L29 10" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M24.5 9.5 C24 8.5 23.5 8 23 7.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29.5 9.5 C30 8.5 30.5 8 31 7" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M25 28.5 L29 28.5" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M25 29 C24.5 30 24 30.8 23.2 31.5" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29 29 C29.5 30 30 31 30.8 31.8" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M22 15 C24 14.5 26 14.8 27 15" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/><path d="M22 23 C24 23.2 26 23.1 27 23" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/></svg></div><span class="nav-logo-text" style="color:white">Orident<span>Inc</span></span></a>
+      <p class="footer-brand-p">The Future of Intelligent Investing. Trade 8 asset classes from one account.</p>
+      <p style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.3)">📧 <span class="oi-email-reveal"></span></p>
+      <p style="margin-top:4px;font-size:12px;color:rgba(255,255,255,0.3)">🕐 Mon–Fri · 9AM–6PM EST</p>
+    </div>
+    <div class="footer-col"><h5>Markets</h5><ul><li><a href="markets.html">Stocks & ETFs</a></li><li><a href="markets.html">Cryptocurrency</a></li><li><a href="markets.html">Forex</a></li><li><a href="markets.html">Real Estate</a></li><li><a href="markets.html">AI & Biotech</a></li></ul></div>
+    <div class="footer-col"><h5>Platform</h5><ul><li><a href="copy-trading.html">Copy Trading</a></li>
+    <li><a href="browse-tags.html">Browse Tags</a></li><li><a href="dashboard.html">Dashboard</a></li><li><a href="deposit.html">Deposit / Withdraw</a></li><li><a href="login.html">Sign In</a></li></ul></div>
+    <div class="footer-col"><h5>Company</h5><ul><li><a href="#faq">FAQ</a></li><li><a href="#reviews">Reviews</a></li><li><a href="#contact">Contact Us</a></li><li><a href="#privacy-modal" onclick="document.getElementById('privacy-modal').style.display='flex'">Privacy Policy</a></li><li><a href="#terms-modal" onclick="document.getElementById('terms-modal').style.display='flex'">Terms of Service</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2020 Orident Inc. All rights reserved. Regulated financial services.</span><span>The Future of Intelligent Investing</span></div>
+</footer>
+
+<!-- PRIVACY POLICY MODAL -->
+<div id="privacy-modal" style="display:none;position:fixed;inset:0;background:rgba(11,17,32,0.7);z-index:9000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:16px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,0.3);">
+    <div style="padding:24px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:white;z-index:1;">
+      <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:var(--ink);">🔒 Privacy Policy</h3>
+      <button onclick="document.getElementById('privacy-modal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">✕</button>
+    </div>
+    <div style="padding:28px;font-size:14px;line-height:1.85;color:var(--ink2);">
+      <p style="color:var(--muted);font-size:12px;margin-bottom:20px;">Last updated: January 1, 2024</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">1. Information We Collect</h4>
+      <p style="margin-bottom:16px;">Orident Inc collects personal information including your name, email address, phone number, date of birth, government-issued identification, and financial information necessary for account verification and regulatory compliance (KYC/AML). We also collect usage data, device information, and trading activity for security and fraud prevention purposes.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">2. How We Use Your Information</h4>
+      <p style="margin-bottom:16px;">Your information is used to: verify your identity in compliance with KYC/AML regulations, process transactions, communicate with you about your account, comply with legal obligations, prevent fraud, and improve our services. We do not sell your personal data to third parties.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">3. Data Security</h4>
+      <p style="margin-bottom:16px;">We employ industry-standard security measures including 256-bit SSL encryption, secure data centers, two-factor authentication, and regular security audits. All sensitive documents are stored in encrypted, access-controlled systems.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">4. Data Sharing</h4>
+      <p style="margin-bottom:16px;">We may share your information with regulatory authorities as required by law, payment processors for transaction handling, and identity verification services. All third parties are contractually bound to protect your data.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">5. Your Rights</h4>
+      <p style="margin-bottom:16px;">You have the right to access, correct, or delete your personal data, withdraw consent, request data portability, and lodge complaints with relevant supervisory authorities. Contact us at <span class="oi-email-reveal"></span> to exercise these rights.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">6. Cookies</h4>
+      <p style="margin-bottom:16px;">We use essential cookies for platform functionality and analytics cookies (with your consent) to improve user experience. You may manage cookie preferences through your browser settings.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">7. Contact</h4>
+      <p>For privacy inquiries: <span class="oi-email-reveal"></span></p>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS MODAL -->
+<div id="terms-modal" style="display:none;position:fixed;inset:0;background:rgba(11,17,32,0.7);z-index:9000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:16px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,0.3);">
+    <div style="padding:24px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:white;z-index:1;">
+      <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:var(--ink);">📋 Terms of Service</h3>
+      <button onclick="document.getElementById('terms-modal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">✕</button>
+    </div>
+    <div style="padding:28px;font-size:14px;line-height:1.85;color:var(--ink2);">
+      <p style="color:var(--muted);font-size:12px;margin-bottom:20px;">Last updated: January 1, 2024</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">1. Acceptance of Terms</h4>
+      <p style="margin-bottom:16px;">By creating an account and using Orident Inc's platform, you agree to be bound by these Terms of Service, our Privacy Policy, and all applicable laws and regulations. If you do not agree, please do not use our services.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">2. Eligibility</h4>
+      <p style="margin-bottom:16px;">You must be at least 18 years of age and legally permitted to trade financial instruments in your jurisdiction. You must complete our KYC verification process before trading. We reserve the right to refuse service in restricted jurisdictions.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">3. Risk Disclosure</h4>
+      <p style="margin-bottom:16px;">Trading forex, stocks, cryptocurrencies, and other financial instruments involves substantial risk of loss. Past performance is not indicative of future results. You should never invest money you cannot afford to lose. Orident Inc does not guarantee profits.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">4. Account Responsibilities</h4>
+      <p style="margin-bottom:16px;">You are responsible for maintaining the security of your account credentials. All trading activity conducted from your account is your responsibility. You must not use the platform for money laundering, fraud, or any illegal activity.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">5. Fees & Commissions</h4>
+      <p style="margin-bottom:16px;">Copy trading commissions and any applicable fees are disclosed within the platform before you commit to any trade. Deposit and withdrawal fees vary by method and are shown at the time of transaction.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">6. Limitation of Liability</h4>
+      <p style="margin-bottom:16px;">Orident Inc shall not be liable for trading losses, platform downtime beyond our control, or losses arising from market volatility. Our liability is limited to the fees paid for our services.</p>
+      <h4 style="font-weight:700;margin-bottom:8px;">7. Governing Law</h4>
+      <p>These terms are governed by applicable financial services laws. Disputes will be resolved through binding arbitration or the relevant regulatory body in your jurisdiction.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const ASSET_ICONS={
+  'AAPL':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>',
+  'MSFT':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 2.75H2.75V11.5H11.5V2.75z" fill="#F35325"/><path d="M21.25 2.75H12.5V11.5H21.25V2.75z" fill="#81BC06"/><path d="M11.5 12.5H2.75V21.25H11.5V12.5z" fill="#05A6F0"/><path d="M21.25 12.5H12.5V21.25H21.25V12.5z" fill="#FFBA08"/></svg>',
+  'GOOGL':'<svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>',
+  'NVDA':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#76B900"><path d="M4.5 9.5V6h5v3.5H8v5h1.5V18h-5v-3.5H6v-5H4.5zm7 0V6h8.5L22 8.5v7L19.5 18H11.5v-3.5H13v-5h-1.5zm3 0v5H18l1-1v-3l-1-1h-3.5z"/></svg>',
+  'TSLA':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#CC0000"><path d="M12 2.5C8.5 2.5 5.5 4 3.5 6.5H20.5C18.5 4 15.5 2.5 12 2.5zM12 5c2 0 3.8.7 5.2 1.8H6.8C8.2 5.7 10 5 12 5zM12 8l-8 2v1.5l8-2 8 2V10l-8-2zm0 3l-4 1v8l4 1 4-1v-8l-4-1zm-2 2h4v6h-4v-6z"/></svg>',
+  'META':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
+  'AMZN':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#FF9900"><path d="M13.958 10.09c0 1.232.029 2.256-.591 3.351-.502.891-1.301 1.44-2.186 1.44-1.214 0-1.922-.924-1.922-2.292 0-2.692 2.415-3.182 4.699-3.182v.683zm3.186 7.705c-.209.189-.512.201-.745.074-1.052-.872-1.238-1.276-1.814-2.106-1.733 1.767-2.96 2.297-5.201 2.297-2.656 0-4.72-1.638-4.72-4.921 0-2.563 1.391-4.307 3.37-5.163 1.715-.756 4.109-.891 5.942-1.099v-.41c0-.753.06-1.642-.384-2.294-.385-.579-1.124-.82-1.775-.82-1.205 0-2.277.618-2.54 1.897-.054.285-.261.567-.549.58l-3.064-.33c-.259-.058-.548-.266-.472-.66C5.849 2.517 8.717 1.5 11.273 1.5c1.305 0 3.01.348 4.039 1.336C16.716 4.011 16.657 5.744 16.657 7.5v5.288c0 1.59.661 2.29 1.284 3.149.221.308.27.677-.014.904l-2.783 2.354v-.4z"/></svg>',
+  'JPM':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#003087"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+  'BTC':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#F7931A"><path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.548v-.002zm-6.35-4.613c.24-1.59-.974-2.45-2.64-3.03l.54-2.153-1.315-.33-.525 2.107c-.345-.087-.705-.167-1.064-.25l.526-2.127-1.32-.33-.54 2.165c-.285-.067-.565-.132-.84-.2l-1.815-.45-.35 1.407s.975.225.955.236c.535.136.63.486.615.766l-1.477 5.92c-.075.166-.24.406-.614.314.015.02-.96-.24-.96-.24l-.66 1.51 1.71.426.93.242-.54 2.19 1.32.327.54-2.17c.36.1.705.19 1.05.273l-.51 2.154 1.32.33.545-2.19c2.24.427 3.93.257 4.64-1.774.57-1.637-.03-2.58-1.217-3.196.854-.193 1.5-.76 1.68-1.93h.01zm-3.01 4.22c-.404 1.64-3.157.75-4.05.53l.72-2.9c.896.23 3.757.67 3.33 2.37zm.41-4.24c-.37 1.49-2.662.735-3.405.55l.654-2.64c.744.18 3.137.524 2.75 2.084v.006z"/></svg>',
+  'ETH':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#627EEA"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/></svg>',
+  'SOL':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#9945FF"><path d="M4 17.5h14.5l-2.5 2.5H2L4 17.5zm0-6h16l-2.5 2.5H1.5L4 11.5zm14.5-8L16 6H1.5l2.5-2.5H18.5z"/></svg>',
+  'EUR/USD':'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#003087"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="bold" fill="white" font-family="sans-serif">€</text></svg>',
+  'GBP/USD':'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#CF142B"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="bold" fill="white" font-family="sans-serif">£</text></svg>',
+  'USD/JPY':'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#BC002D"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="bold" fill="white" font-family="sans-serif">¥</text></svg>',
+  'SPX':'<svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><polyline points="3 17 7 11 11 14 15 7 21 7"/><line x1="3" y1="20" x2="21" y2="20"/></svg>',
+  'NDX':'<svg viewBox="0 0 24 24" fill="none" stroke="#0066CC" stroke-width="2" stroke-linecap="round"><polyline points="3 17 7 11 11 14 15 7 21 7"/><line x1="3" y1="20" x2="21" y2="20"/></svg>',
+  'DJI':'<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"><polyline points="3 17 7 11 11 14 15 7 21 7"/><line x1="3" y1="20" x2="21" y2="20"/><circle cx="21" cy="7" r="2" fill="#333"/></svg>',
+  'FTSE':'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#CF142B"/><text x="12" y="15" text-anchor="middle" font-size="7" font-weight="bold" fill="white" font-family="sans-serif">FTSE</text></svg>',
+  'DAX':'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#000000"/><text x="12" y="15" text-anchor="middle" font-size="7" font-weight="bold" fill="#FFCC00" font-family="sans-serif">DAX</text></svg>',
+  'N225':'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#BC002D"/><circle cx="12" cy="12" r="4" fill="white"/></svg>',
+  'XAUUSD':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#CFB53B"><path d="M12 2L9.5 8H2l5.5 4-2 7 6.5-4.5 6.5 4.5-2-7L22 8h-7.5L12 2z"/></svg>',
+  'XAGUSD':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#A8A9AD"><circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="white" font-family="sans-serif">Ag</text></svg>',
+  'WTIUSD':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#333"><path d="M12 3c0 0-4 4-4 8a4 4 0 0 0 8 0c0-4-4-8-4-8z"/><rect x="10" y="17" width="4" height="4" rx="1"/></svg>',
+  'NATGAS':'<svg viewBox="0 0 24 24" fill="none" stroke="#E85D04" stroke-width="2" stroke-linecap="round"><path d="M8.5 14c.5-3 2.5-5 3.5-9 1 4 3 6 3.5 9a7 7 0 0 1-7 0z"/></svg>',
+  'COPPER':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#B87333"><circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="white" font-family="sans-serif">Cu</text></svg>',
+  'PLTR':'<svg viewBox="0 0 24 24" fill="currentColor" style="color:#000"><path d="M5 3h5v18H5V3zm9 0h5v18h-5V3z"/></svg>',
+  'AI':'<svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>',
+  'IONQ':'<svg viewBox="0 0 24 24" fill="none" stroke="#0891B2" stroke-width="2"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>',
+  'MRNA':'<svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round"><path d="M4 4c4 4 4 8 0 12M8 4c4 4 4 8 0 12M12 4c4 4 4 8 0 12M16 4c4 4 4 8 0 12M20 4c0 4-4 8-4 12"/></svg>',
+  'CRSP':'<svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><path d="M6.34 6.34l2 2M15.66 15.66l2 2M6.34 17.66l2-2M15.66 8.34l2-2"/></svg>',
+  'SPG':'<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><rect x="9" y="12" width="6" height="9"/></svg>',
+  'EQIX':'<svg viewBox="0 0 24 24" fill="none" stroke="#E85D04" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+  'default':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+};
+function getAssetIcon(sym){return ASSET_ICONS[sym]||ASSET_ICONS['default'];}
+
+const heroItems=[
+  {sym:'AAPL',name:'Apple Inc.',bg:'#1C1C1E',col:'white'},
+  {sym:'BTC',name:'Bitcoin',bg:'#FFF5E6',col:'#F7931A'},
+  {sym:'EUR/USD',name:'EUR/USD',bg:'#EEF3FF',col:'#003087'},
+  {sym:'SPX',name:'S&P 500',bg:'#F5F5F5',col:'#1A1A1A'},
+  {sym:'XAUUSD',name:'Gold',bg:'#FFF9E6',col:'#CFB53B'},
+  {sym:'MRNA',name:'Moderna',bg:'#F3EEFF',col:'#7C3AED'},
+];
+function renderHero(){
+  const el=document.getElementById('live-rows');if(!el)return;
+  const all=[...ASSETS.stocks,...ASSETS.crypto,...ASSETS.forex,...ASSETS.indices,...ASSETS.commodities,...ASSETS.ai_biotech];
+  el.innerHTML=heroItems.map(h=>{
+    const a=all.find(x=>x.sym===h.sym)||{price:0,pct:0};
+    return `<div class="mrow"><div class="mrow-l"><div class="mrow-icon" style="background:${h.bg};color:${h.col};display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;flex-shrink:0;">${getAssetIcon(h.sym)}</div><div><div class="mrow-name">${h.sym}</div><div class="mrow-sub">${h.name}</div></div></div><div><div class="mrow-price">${a.price>100?'$'+fmt(a.price):'$'+fmt(a.price,4)}</div><div class="mrow-chg ${pctClass(a.pct)}">${fmtPct(a.pct)}</div></div></div>`;
+  }).join('');
+}
+renderHero();
+document.addEventListener('prices:update',renderHero);
+
+let curType='stocks';
+function showAssets(type,btn){
+  curType=type;
+  document.querySelectorAll('.asset-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+function renderGrid(){
+  const el=document.getElementById('asset-grid');if(!el)return;
+  const arr=(ASSETS[curType]||[]).slice(0,12);
+  el.innerHTML=arr.map(a=>`<div class="ac" onclick="location.href='markets.html'"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div style="width:32px;height:32px;border-radius:7px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${getAssetIcon(a.sym)}</div><div><div class="ac-sym">${a.sym}</div><div class="ac-name">${a.name}</div></div></div><div class="ac-price">${a.price>100?'$'+fmt(a.price):'$'+fmt(a.price,4)}</div><div style="display:flex;justify-content:space-between;align-items:center;">${pctBadge(a.pct)}<span style="font-size:11px;color:var(--muted)">${a.sector||a.type||''}</span></div></div>`).join('');
+}
+renderGrid();
+document.addEventListener('prices:update',renderGrid);
+
+function renderRE(){
+  const el=document.getElementById('re-grid');if(!el)return;
+  el.innerHTML=ASSETS.realestate.map(r=>`<div class="rec"><div class="rec-city">${r.city}</div><div class="rec-state">${r.state} · Real Estate Index</div><div class="rec-price">$${fmt(r.price)}</div><div class="rec-label">Price per sq ft</div><div class="rec-foot">${pctBadge(r.pct)}<span style="font-size:11px;color:rgba(255,255,255,0.35)">Vol ${r.vol}</span></div></div>`).join('');
+}
+renderRE();
+
+const traders=[
+  {name:'Alex Rivera',handle:'@arivera',ret:'+142.8%',win:'78%',fol:'12.4K',risk:'Medium',col:'#3A3A3A'},
+  {name:'Priya Shah',handle:'@priyatrades',ret:'+98.4%',win:'71%',fol:'8.9K',risk:'Low',col:'#00C27A'},
+  {name:'James Okon',handle:'@jokon',ret:'+87.2%',win:'69%',fol:'6.2K',risk:'Low',col:'#7C3AED'},
+  {name:'Chen Wei',handle:'@cwei_fx',ret:'+215.6%',win:'82%',fol:'22.1K',risk:'High',col:'#F5A623'},
+];
+document.getElementById('top-traders').innerHTML=traders.map((t,i)=>`<div class="trc"><div class="trc-head"><div class="trc-av" style="background:${t.col}20;color:${t.col}">${t.name[0]}</div><div><div class="trc-name">${t.name}</div><div class="trc-handle">${t.handle}</div></div><div class="trc-rank">#${i+1}</div></div><div class="trc-stats"><div><div class="trc-sl">Return</div><div class="trc-sv up">${t.ret}</div></div><div><div class="trc-sl">Win Rate</div><div class="trc-sv">${t.win}</div></div><div><div class="trc-sl">Followers</div><div class="trc-sv">${t.fol}</div></script>
+<script>
+// ── REVIEWS ──────────────────────────────────────────────────
+const REVIEWS=[
+  {name:'Marcus T.',loc:'New York, USA',init:'M',col:'#333',stars:5,text:'I\'ve used 6 brokers over 10 years. Orident is on another level. The real estate market feature alone is worth it — made more in 3 months than the entire last year.',asset:'Real Estate'},
+  {name:'Sophie L.',loc:'Paris, France',init:'S',col:'#555',stars:5,text:'The copy trading feature is genius. I set it to auto-copy the top trader and my portfolio grew 34% in two months. Completely hands-free.',asset:'Copy Trading'},
+  {name:'Ricardo S.',loc:'São Paulo, Brazil',init:'R',col:'#444',stars:5,text:'Stocks, crypto, forex, REITs and AI stocks all in one dashboard is a game-changer. Orident does it all. I don\'t need 5 different apps anymore.',asset:'Multi-Asset'},
+  {name:'Sarah K.',loc:'London, UK',init:'S',col:'#222',stars:5,text:'KYC was smooth and professional. Verified and trading within an hour. The platform is incredibly fast and the live prices are accurate.',asset:'Stocks & ETFs'},
+  {name:'David M.',loc:'Toronto, Canada',init:'D',col:'#666',stars:5,text:'Deposited and withdrew within the same week without any issues. Support responded within hours. I trust this platform completely.',asset:'Forex & Indices'},
+  {name:'Kenji T.',loc:'Tokyo, Japan',init:'K',col:'#333',stars:5,text:'The AI & Biotech section is a goldmine. The quant tools give me an edge I never had before. Institutional quality for retail investors.',asset:'AI & Biotech'},
+  {name:'Lena H.',loc:'Berlin, Germany',init:'L',col:'#555',stars:5,text:'Best execution speeds I\'ve seen on any retail platform. The indices and forex spreads are tight, and the interface is incredibly clean.',asset:'Forex & Indices'},
+  {name:'Ahmed R.',loc:'Dubai, UAE',init:'A',col:'#444',stars:5,text:'The AI-powered quant signals helped me time my entries on NVDA and MSFT perfectly. Up 42% this quarter. Remarkable platform.',asset:'Stocks & ETFs'},
+];
+function renderReviews(){
+  const el=document.getElementById('reviews-grid');
+  if(!el)return;
+  el.innerHTML=REVIEWS.map(r=>`
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:24px;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='var(--shadow2)'" onmouseout="this.style.boxShadow=''">
+      <div style="color:var(--gold);font-size:14px;margin-bottom:12px;">${'★'.repeat(r.stars)}</div>
+      <p style="font-size:14px;color:var(--ink2);line-height:1.8;margin-bottom:18px;">"${r.text}"</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:${r.col}20;color:${r.col};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">${r.init}</div>
+          <div><div style="font-weight:700;font-size:13px;">${r.name}</div><div style="font-size:11px;color:var(--muted)">${r.loc}</div></div>
+        </div>
+        <span class="badge badge-grey" style="background:#eee;color:#555;" style="font-size:10px;white-space:nowrap;">${r.asset}</span>
+      </div>
+    </div>`).join('');
+}
+renderReviews();
+
+// ── FAQ ───────────────────────────────────────────────────────
+const FAQS=[
+  {q:'Is Orident Inc a legitimate broker?',a:'Yes. Orident Inc is a regulated investment platform that complies with KYC/AML requirements and financial services regulations. All client funds are held in segregated accounts separate from company funds.'},
+  {q:'What is the minimum deposit to start trading?',a:'There is no mandatory minimum deposit. You can fund your account with any amount and begin exploring the platform immediately after KYC verification is complete.'},
+  {q:'How does Copy Trading work?',a:'Copy Trading allows you to automatically mirror the trades of verified top-performing traders. When they buy or sell, the same action is proportionally replicated in your account. A commission of 10% of profits is charged only on gains — you pay nothing extra upfront.'},
+  {q:'What documents do I need for KYC verification?',a:'You need a government-issued photo ID (passport or driver\'s license), a selfie holding your ID, and proof of address (utility bill or bank statement dated within 90 days). U.S. clients must also submit an IRS W-9 form; international clients submit a W-8BEN.'},
+  {q:'How long does account verification take?',a:'Most accounts are verified within 24–48 hours. In some cases, additional documentation may be requested which can extend the timeline slightly.'},
+  {q:'What asset classes can I trade on Orident?',a:'Orident Inc offers Stocks & ETFs, Cryptocurrency, Forex, Options, Indices, Real Estate (REIT + city price indexes), Commodities, and AI & Biotech — all from a single account.'},
+  {q:'How do I deposit or withdraw funds?',a:'You can deposit using credit/debit cards, bank transfer, cryptocurrency (USDT/BTC), or PayPal. Withdrawals are processed via the same methods. There are no fees on standard deposits or withdrawals.'},
+  {q:'What are your support hours?',a:'Our support team is available Monday–Friday, 9AM–6PM EST. The platform is accessible 24/7. Email us anytime at oridentinc@proton.me and we\'ll respond within 24 hours.'},
+  {q:'Is my data safe with Orident Inc?',a:'Absolutely. We use 256-bit SSL encryption, two-factor authentication, and store all sensitive documents in encrypted access-controlled systems. We never sell your data to third parties for marketing.'},
+  {q:'What is the trading risk acknowledgment?',a:'All users must acknowledge that trading forex, stocks, crypto, and other financial instruments involves risk and that past performance does not guarantee future results. This acknowledgment is required during the KYC onboarding process.'},
+];
+function renderFAQ(){
+  const el=document.getElementById('faq-list');
+  if(!el) return;
+  el.innerHTML=FAQS.map((f,i)=>`
+    <div style="border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;">
+      <button onclick="toggleFaq(${i},this)" style="width:100%;padding:18px 20px;background:white;border:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:var(--ink);text-align:left;gap:12px;">
+        <span>${f.q}</span>
+        <span id="faq-icon-${i}" style="font-size:20px;color:var(--ink);flex-shrink:0;">+</span>
+      </button>
+      <div id="faq-body-${i}" style="display:none;padding:0 20px 18px;font-size:14px;line-height:1.75;color:var(--muted);background:var(--surface);">${f.a}</div>
+    </div>`).join('');
+}
+renderFAQ();
+
+function toggleFaq(i,btn){
+  const body=document.getElementById('faq-body-'+i);
+  const icon=document.getElementById('faq-icon-'+i);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  icon.textContent=open?'+':'−';
+  btn.style.background=open?'white':'var(--surface)';
+}
+
+function sendContactMsg(){
+  const n=document.getElementById('contact-name').value.trim();
+  const e=document.getElementById('contact-email').value.trim();
+  const m=document.getElementById('contact-msg').value.trim();
+  if(!n||!e||!m){showToast('Please fill in all fields','error','⚠️');return;}
+  document.getElementById('contact-sent').style.display='block';
+  ['contact-name','contact-email','contact-msg'].forEach(id=>document.getElementById(id).value='');
+  showToast('Message sent! We\'ll reply within 24 hours.','success','✅');
+}
+</script>
+
+<!-- LIVE CHAT WIDGET -->
+<div id="chat-bubble" onclick="toggleChat()" style="position:fixed;bottom:28px;right:28px;width:56px;height:56px;background:#3A3A3A;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,0.3);z-index:8000;transition:transform .2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  <span id="chat-icon" style="font-size:22px;">💬</span>
+  <div id="chat-notif" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--red);border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">1</div>
+</div>
+<div id="chat-window" style="display:none;position:fixed;bottom:96px;right:28px;width:340px;background:white;border-radius:16px;box-shadow:0 12px 60px rgba(0,0,0,0.2);z-index:8000;overflow:hidden;border:1px solid var(--border);">
+  <div style="background:linear-gradient(135deg,#2C2C2C,#1A1A1A);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;">🤝</div>
+      <div>
+        <div style="font-weight:700;color:white;font-size:14px;">Orident Support</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;"></span>Online · Mon–Fri 9AM–6PM EST</div>
+      </div>
+    </div>
+    <button onclick="toggleChat()" style="background:rgba(255,255,255,.15);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;">✕</button>
+  </div>
+  <div id="chat-msgs" style="height:260px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--surface);">
+    <div style="background:white;border-radius:0 10px 10px 10px;padding:10px 14px;font-size:13px;line-height:1.6;box-shadow:var(--shadow);max-width:85%;">👋 Hi! Welcome to <strong>Orident Inc</strong>. How can we help you today?</div>
+    <div style="background:white;border-radius:0 10px 10px 10px;padding:10px 14px;font-size:13px;line-height:1.6;box-shadow:var(--shadow);max-width:85%;">We're available <strong>Mon–Fri, 9AM–6PM EST</strong>. Outside these hours we reply within 24 hours.</div>
+  </div>
+  <div style="display:flex;gap:6px;padding:8px 10px;flex-wrap:wrap;border-top:1px solid var(--border);background:white;">
+    <button onclick="chatQuick('How do I open an account?')" style="padding:5px 10px;border-radius:14px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;color:var(--ink);">Open account</button>
+    <button onclick="chatQuick('How do I deposit funds?')" style="padding:5px 10px;border-radius:14px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;color:var(--ink);">Deposit funds</button>
+    <button onclick="chatQuick('How does copy trading work?')" style="padding:5px 10px;border-radius:14px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;color:var(--ink);">Copy trading</button>
+    <button onclick="chatQuick('How do I verify my account?')" style="padding:5px 10px;border-radius:14px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;color:var(--ink);">KYC verify</button>
+  </div>
+  <div style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:white;">
+    <input type="text" id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"/>
+    <button onclick="sendChat()" style="background:#3A3A3A;color:white;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">→</button>
+  </div>
+</div>
+<script>
+const CHAT_REPLIES=[
+  {k:['account','open','register','sign up'],r:'To open an account, click <strong>Get Started</strong> at the top. Takes ~5 minutes. You\'ll need a valid email and complete KYC verification after signup.'},
+  {k:['deposit','fund','add money','payment'],r:'Deposit via Card, Bank Transfer, Crypto (USDT/BTC), or PayPal — no fees! Go to <strong>Deposit / Withdraw</strong> in your dashboard after logging in.'},
+  {k:['withdraw','cashout','cash out'],r:'Withdrawals process via the same method used to deposit. Go to <strong>Deposit/Withdraw → Withdraw tab</strong>. Bank transfers take 1–3 business days; crypto within 1 hour.'},
+  {k:['copy','copy trading','follow trader'],r:'Copy Trading auto-mirrors verified top traders\' positions. Visit <strong>Copy Trading</strong>, choose a trader by risk/return, then click <strong>Copy Trader</strong>. Commission is 10% of profits only.'},
+  {k:['kyc','verify','verification','id','document'],r:'KYC requires a photo ID, selfie with ID, and proof of address. U.S. clients also need a W-9; international clients need a W-8BEN. Verification takes 24–48 hours.'},
+  {k:['crypto','bitcoin','btc','eth','ethereum'],r:'We support Bitcoin, Ethereum, Solana, BNB, XRP and more. Visit <strong>Markets → Crypto</strong> for all available pairs.'},
+  {k:['stock','shares','equity'],r:'We offer 30+ stocks including AAPL, NVDA, TSLA, MSFT and more. Visit <strong>Markets → Stocks</strong>.'},
+  {k:['forex','currency','eur','gbp'],r:'8 major and minor Forex pairs with real-time pricing. Visit <strong>Markets → Forex</strong>.'},
+  {k:['fee','cost','charge','commission'],r:'No deposit fees, no trading fees on standard orders. Copy trading commission is 10% of profits — only charged on gains, never losses.'},
+  {k:['hours','support','contact','when'],r:'Support is available <strong>Mon–Fri, 9AM–6PM EST</strong>. Email: <strong>oridentinc@proton.me</strong> — 24 hour reply guarantee.'},
+  {k:['safe','secure','trust','regulated','legitimate'],r:'Orident Inc is a regulated platform. Client funds are in segregated accounts, all data uses 256-bit SSL encryption, and we are fully KYC/AML compliant.'},
+  {k:['real estate','reit','property','city'],r:'We offer real estate price index trading by city — invest in NY, Miami, Austin and more. Visit <strong>Markets → Real Estate</strong>.'},
+];
+const DEFAULT_CHAT='Thanks for your message! Our team will respond shortly. For urgent queries email <strong>oridentinc@proton.me</strong> or check our FAQ above.';
+</script>
+
+<script>
+// Runtime email assembly — bypasses Cloudflare/Netlify obfuscation
+(function(){
+  var e = 'oridentinc' + '@' + 'proton.me';
+  // Populate all email placeholder spans
+  document.querySelectorAll('.oi-email-reveal').forEach(function(el){
+    var a = document.createElement('a');
+    a.href = 'mai'+'lto:'+e;
+    a.textContent = e;
+    a.style.cssText = el.getAttribute('data-style') || 'color:inherit;text-decoration:none;font-weight:600;';
+    el.parentNode.replaceChild(a, el);
+  });
+})();
+function nlSignup(){
+  const email = document.getElementById('nl-email').value.trim();
+  if(!email||!email.includes('@')){showToast('Please enter a valid email','error','⚠️');return;}
+  document.getElementById('nl-email').value='';
+  document.getElementById('nl-confirm').style.display='block';
+  showToast('Subscribed! First issue lands next Monday.','success','📬');
+}
+
+</script>
+</body>
+</html>

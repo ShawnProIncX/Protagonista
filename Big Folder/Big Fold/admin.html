@@ -1,0 +1,954 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin — Orident Inc</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+body{background:#0B1120;min-height:100vh;}
+.admin-login{display:none;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.admin-login.show{display:flex;}
+.admin-login-box{background:white;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:var(--shadow3);}
+.admin-wrap{display:none;padding-top:68px;}
+.admin-wrap.show{display:block;}
+.admin-sidebar{position:fixed;top:68px;left:0;width:220px;height:calc(100vh - 68px);background:var(--ink2);overflow-y:auto;z-index:100;}
+.admin-sidebar .s-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);padding:16px 18px 8px;}
+.admin-sidebar .s-item{display:flex;align-items:center;gap:10px;padding:11px 18px;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border-radius:0;}
+.admin-sidebar .s-item:hover,.admin-sidebar .s-item.active{background:rgba(255,255,255,.08);color:white;}
+.admin-content{margin-left:220px;padding:28px;background:var(--surface);min-height:calc(100vh - 68px);}
+.admin-section{display:none;}
+.admin-section.active{display:block;}
+.admin-kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+.admin-kpi{background:white;border:1px solid var(--border);border-radius:var(--r);padding:20px;}
+.admin-kpi .k-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.admin-kpi .k-val{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--ink);}
+.admin-kpi .k-sub{font-size:11px;color:var(--muted);margin-top:5px;}
+.table-wrap{background:white;border:1px solid var(--border);border-radius:var(--r);overflow:auto;}
+.users-table{width:100%;border-collapse:collapse;}
+.users-table th{font-size:11px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;padding:12px 16px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface);white-space:nowrap;}
+.users-table td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;}
+.users-table tr:last-child td{border-bottom:none;}
+.action-btns{display:flex;gap:6px;}
+.act-btn{padding:5px 12px;border-radius:5px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;}
+.act-add{background:var(--green2);color:var(--green);}
+.act-add:hover{background:var(--green);color:white;}
+.act-sub{background:var(--red2);color:var(--red);}
+.act-sub:hover{background:var(--red);color:white;}
+.act-edit{background:var(--surface);color:var(--ink);}
+.act-edit:hover{background:var(--ink);color:white;}
+.act-ban{background:var(--surface);color:var(--muted);border:1px solid var(--border);}
+.adj-modal .modal-box{max-width:420px;}
+.adj-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.adj-type{padding:12px;border:2px solid var(--border);border-radius:8px;background:white;cursor:pointer;text-align:center;transition:all .2s;}
+.adj-type.active{border-color:var(--ink);background:var(--surface);}
+.adj-type .icon{font-size:20px;margin-bottom:4px;}
+.adj-type .label{font-size:12px;font-weight:700;color:var(--ink);}
+.page-editor{background:white;border:1px solid var(--border);border-radius:var(--r);padding:24px;}
+.page-field{margin-bottom:20px;}
+.page-field label{font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:7px;}
+.page-field input,.page-field textarea,.page-field select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;}
+.page-field input:focus,.page-field textarea:focus{border-color:var(--ink);}
+.page-field textarea{min-height:100px;resize:vertical;}
+</style>
+</head><body>
+<div id="toast-container"></div>
+
+<!-- ADMIN LOGIN -->
+<div class="admin-login show" id="admin-login-screen">
+  <div class="admin-login-box">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div class="nav-logo-mark" style="margin:0 auto 12px;background:linear-gradient(135deg,#F03A47,#C70025);">A</div>
+      <div style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.3rem;color:var(--ink)">Admin Portal</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px;">Orident Inc · Restricted Access</div>
+    </div>
+    <div class="alert-box" id="admin-alert" style="display:none;"></div>
+    <div class="form-group"><label>Admin Username</label><input type="text" id="admin-user" placeholder="orident_admin"/></div>
+    <div class="form-group"><label>Admin Password</label><input type="password" id="admin-pass" placeholder="••••••••••••••••"/></div>
+    <button class="btn-primary" style="width:100%;justify-content:center;padding:14px;background:var(--ink);" onclick="adminLogin()">Access Admin Panel</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-wrap" id="admin-panel">
+  <nav class="orident-nav" style="background:var(--ink2);border-bottom:1px solid rgba(255,255,255,.1);">
+    <a href="#" class="nav-logo"><div class="nav-logo-mark" style="background:linear-gradient(135deg,#F03A47,#C70025);">A</div><span class="nav-logo-text" style="color:white;">Admin<span style="color:var(--red)">Portal</span></span></a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:13px;color:rgba(255,255,255,.5)">🔒 Secured Session</span>
+      <a href="index.html" class="btn-ghost" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)">← Front Site</a>
+      <button onclick="adminLogout()" style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:8px 16px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;">Sign Out</button>
+    </div>
+  </nav>
+
+  <div style="display:flex;">
+    <div class="admin-sidebar">
+      <div class="s-label">Overview</div>
+      <div class="s-item active" onclick="showSection('overview',this)"><span>📊</span> Dashboard</div>
+      <div class="s-label">Users</div>
+      <div class="s-item" onclick="showSection('users',this)"><span>👥</span> All Users</div>
+      <div class="s-item" onclick="showSection('accounts',this)"><span>💳</span> Accounts & Balances</div>
+      <div class="s-label">Transactions</div>
+      <div class="s-item" onclick="showSection('deposits',this)"><span>💰</span> Deposits</div>
+      <div class="s-item" onclick="showSection('withdrawals',this)"><span>↑</span> Withdrawals</div>
+      <div class="s-item" onclick="showSection('trades',this)"><span>📈</span> Trades</div>
+      <div class="s-label">Platform</div>
+      <div class="s-item" onclick="showSection('pages',this)"><span>🖊️</span> Edit Page Content</div>
+      <div class="s-item" onclick="showSection('payment-methods',this)"><span>💳</span> Payment Methods</div>
+      <div class="s-item" onclick="showSection('markets-admin',this)"><span>📉</span> Market Settings</div>
+      <div class="s-label">System</div>
+      <div class="s-item" onclick="showSection('settings',this)"><span>⚙️</span> Settings</div>
+      <div class="s-item" onclick="showSection('logs',this)"><span>📋</span> Activity Logs</div>
+    </div>
+    <div class="admin-content">
+
+      <!-- OVERVIEW -->
+      <div class="admin-section active" id="section-overview">
+        <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:20px;">Admin Dashboard</h2>
+        <div class="admin-kpi-grid" id="admin-kpis"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="table-wrap"><div style="padding:18px;border-bottom:1px solid var(--border);font-family:'Sora',sans-serif;font-weight:700;font-size:14px;">Recent Registrations</div><div id="recent-reg" style="padding:16px;"></div></div>
+          <div class="table-wrap"><div style="padding:18px;border-bottom:1px solid var(--border);font-family:'Sora',sans-serif;font-weight:700;font-size:14px;">Recent Deposits</div><div id="recent-dep" style="padding:16px;"></div></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="admin-section" id="section-users">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;">All Users</h2>
+          <div style="display:flex;gap:10px;"><input type="text" id="user-search" placeholder="Search users..." style="padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" oninput="renderUsers()"/></div>
+        </div>
+        <div class="table-wrap"><table class="users-table" id="users-table"><thead><tr><th>Name</th><th>Email</th><th>Country</th><th>Balance</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
+      </div>
+
+      <!-- ACCOUNTS & BALANCES -->
+      <div class="admin-section" id="section-accounts">
+        <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:20px;">Accounts & Balance Adjustments</h2>
+        <div class="table-wrap"><table class="users-table"><thead><tr><th>User</th><th>Email</th><th>Balance</th><th>Total Deposited</th><th>Total Withdrawn</th><th>Account Type</th><th>Adjust</th></tr></thead><tbody id="accounts-tbody"></tbody></table></div>
+      </div>
+
+      <!-- DEPOSITS -->
+      <div class="admin-section" id="section-deposits">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;">Deposit Requests</h2>
+          <div style="display:flex;gap:8px;"><button class="act-btn act-add" style="padding:8px 16px;font-size:13px;" onclick="approveAllDeposits()">Approve All Pending</button></div>
+        </div>
+        <div class="table-wrap"><table class="users-table"><thead><tr><th>User</th><th>Date</th><th>Method</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="deposits-tbody"></tbody></table></div>
+      </div>
+
+      <!-- WITHDRAWALS -->
+      <div class="admin-section" id="section-withdrawals">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;">Withdrawal Requests</h2>
+          <span class="badge badge-down" id="pending-wit-badge">0 Pending</span>
+        </div>
+        <div class="table-wrap"><table class="users-table"><thead><tr><th>User</th><th>Date</th><th>Amount</th><th>Destination</th><th>Status</th><th>Action</th></tr></thead><tbody id="withdrawals-tbody"></tbody></table></div>
+      </div>
+
+      <!-- TRADES -->
+      <div class="admin-section" id="section-trades">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;">Trade Management</h2>
+          <button class="act-btn act-add" onclick="showPlaceTradeModal()">+ Place Trade for User</button>
+        </div>
+
+        <!-- PLACE TRADE FOR USER MODAL -->
+        <div id="place-trade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
+          <div style="background:white;border-radius:16px;padding:32px;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,0.3);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+              <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;">Place Trade for User</h3>
+              <button onclick="document.getElementById('place-trade-modal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+            </div>
+            <div id="place-trade-alert" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;"></div>
+            <div class="page-field">
+              <label>Select User</label>
+              <select id="pt-user-select"><option value="">— Select a user —</option></select>
+            </div>
+            <div style="background:#f5f5f5;border-radius:10px;padding:14px;margin-bottom:16px;" id="pt-user-info" style="display:none;">
+              <div style="font-size:12px;color:#888;margin-bottom:4px;">Current Balance</div>
+              <div style="font-size:1.4rem;font-weight:800;font-family:'Sora',sans-serif;" id="pt-balance">$0.00</div>
+            </div>
+            <div class="page-field">
+              <label>Asset Symbol</label>
+              <select id="pt-symbol">
+                <optgroup label="Stocks">
+                  <option>AAPL</option><option>MSFT</option><option>GOOGL</option><option>AMZN</option><option>NVDA</option><option>META</option><option>TSLA</option><option>JPM</option><option>V</option><option>MA</option><option>NFLX</option><option>AMD</option><option>QCOM</option><option>ADBE</option><option>CRM</option>
+                </optgroup>
+                <optgroup label="Crypto">
+                  <option>BTC</option><option>ETH</option><option>SOL</option><option>BNB</option><option>XRP</option><option>ADA</option><option>AVAX</option><option>DOGE</option>
+                </optgroup>
+                <optgroup label="Forex">
+                  <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option><option>USD/CHF</option>
+                </optgroup>
+                <optgroup label="Indices">
+                  <option>SPX</option><option>NDX</option><option>DJI</option><option>FTSE</option><option>DAX</option><option>N225</option>
+                </optgroup>
+                <optgroup label="Commodities">
+                  <option>XAUUSD</option><option>XAGUSD</option><option>WTIUSD</option><option>NATGAS</option><option>COPPER</option>
+                </optgroup>
+                <optgroup label="AI & Biotech">
+                  <option>PLTR</option><option>AI</option><option>IONQ</option><option>MRNA</option><option>CRSP</option>
+                </optgroup>
+                <optgroup label="REITs">
+                  <option>SPG</option><option>PLD</option><option>EQIX</option><option>AMT</option><option>VNQ</option>
+                </optgroup>
+                <optgroup label="Custom">
+                  <option value="CUSTOM">Custom Symbol...</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="page-field" id="pt-custom-wrap" style="display:none;">
+              <label>Custom Symbol</label>
+              <input type="text" id="pt-custom-sym" placeholder="e.g. CUSTOM123"/>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div class="page-field">
+                <label>Direction</label>
+                <select id="pt-direction">
+                  <option value="BUY">BUY / Long</option>
+                  <option value="SELL">SELL / Short</option>
+                </select>
+              </div>
+              <div class="page-field">
+                <label>Order Type</label>
+                <select id="pt-order-type">
+                  <option value="MARKET">Market Order</option>
+                  <option value="LIMIT">Limit Order</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div class="page-field">
+                <label>Entry Price (USD)</label>
+                <input type="number" id="pt-entry" placeholder="e.g. 189.30" step="0.0001"/>
+              </div>
+              <div class="page-field">
+                <label>Quantity / Lots</label>
+                <input type="number" id="pt-qty" placeholder="e.g. 10" step="0.01" min="0.01"/>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div class="page-field">
+                <label>Stop Loss (optional)</label>
+                <input type="number" id="pt-sl" placeholder="e.g. 180.00" step="0.0001"/>
+              </div>
+              <div class="page-field">
+                <label>Take Profit (optional)</label>
+                <input type="number" id="pt-tp" placeholder="e.g. 200.00" step="0.0001"/>
+              </div>
+            </div>
+            <div class="page-field">
+              <label>Trade Status</label>
+              <select id="pt-status">
+                <option value="OPEN">Open (Active Position)</option>
+                <option value="CLOSED">Closed (Completed)</option>
+                <option value="PENDING">Pending</option>
+              </select>
+            </div>
+            <div class="page-field" id="pt-pnl-wrap">
+              <label>P&L Override (if Closed, USD)</label>
+              <input type="number" id="pt-pnl" placeholder="e.g. +450.00 or -120.00" step="0.01"/>
+            </div>
+            <div class="page-field">
+              <label>Trade Date/Time</label>
+              <input type="datetime-local" id="pt-datetime"/>
+            </div>
+            <div class="page-field">
+              <label>Admin Note (internal only)</label>
+              <input type="text" id="pt-note" placeholder="Optional internal note"/>
+            </div>
+            <div style="background:#fffbeb;border:1px solid #f5c542;border-radius:8px;padding:12px;font-size:12px;color:#7A5800;margin-bottom:18px;">
+              ⚠️ This trade will be written directly to the user's portfolio and trade history. Balance will be adjusted if applicable.
+            </div>
+            <button class="act-btn act-add" style="width:100%;justify-content:center;padding:13px;font-size:15px;" onclick="adminPlaceTrade()">Execute Trade for User</button>
+          </div>
+        </div>
+
+        <!-- EDIT EXISTING TRADE MODAL -->
+        <div id="edit-trade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
+          <div style="background:white;border-radius:16px;padding:32px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,0.3);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+              <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;">Edit Trade</h3>
+              <button onclick="document.getElementById('edit-trade-modal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+            </div>
+            <div class="page-field"><label>Status</label><select id="et-status"><option value="OPEN">Open</option><option value="CLOSED">Closed</option><option value="PENDING">Pending</option></select></div>
+            <div class="page-field"><label>Close Price</label><input type="number" id="et-close-price" placeholder="e.g. 195.00" step="0.0001"/></div>
+            <div class="page-field"><label>P&L (USD)</label><input type="number" id="et-pnl" placeholder="e.g. +320.00" step="0.01"/></div>
+            <div class="page-field"><label>Admin Note</label><input type="text" id="et-note" placeholder="Optional note"/></div>
+            <input type="hidden" id="et-trade-id"/>
+            <input type="hidden" id="et-user-email"/>
+            <button class="act-btn act-add" style="width:100%;justify-content:center;padding:12px;" onclick="saveTradeEdit()">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- ALL TRADES TABLE -->
+        <div class="table-wrap">
+          <table class="users-table">
+            <thead><tr><th>User</th><th>Symbol</th><th>Direction</th><th>Qty</th><th>Entry</th><th>P&L</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="trades-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAGE EDITOR -->
+      <div class="admin-section" id="section-pages">
+        <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:20px;">Edit Page Content</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="page-editor">
+            <h3 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;margin-bottom:18px;">🏠 Homepage Content</h3>
+            <div class="page-field"><label>Hero Headline</label><input type="text" value="The Future of Intelligent Investing" id="pg-headline"/></div>
+            <div class="page-field"><label>Hero Subtitle</label><textarea id="pg-sub">Trade Stocks, Crypto, Forex, Options, Real Estate, Indices, Commodities, AI & Biotech — all from one powerful platform.</textarea></div>
+            <div class="page-field"><label>Stats — Total Volume</label><input type="text" value="$2.4B+" id="pg-vol"/></div>
+            <div class="page-field"><label>Stats — Active Investors</label><input type="text" value="801K+" id="pg-users"/></div>
+            <button class="btn-primary" style="padding:11px 24px;" onclick="savePage()">Save Changes</button>
+          </div>
+          <div class="page-editor">
+            <h3 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;margin-bottom:18px;">⚙️ Platform Settings</h3>
+            <div class="page-field"><label>Minimum Deposit ($)</label><input type="number" value="10" id="set-min-dep"/></div>
+            <div class="page-field"><label>Minimum Withdrawal ($)</label><input type="number" value="10" id="set-min-wit"/></div>
+            <div class="page-field"><label>Copy Trading Commission (%)</label><input type="number" value="10" id="set-commission"/></div>
+            <div class="page-field"><label>Welcome Bonus ($)</label><input type="number" value="10000" id="set-bonus"/></div>
+            <div class="page-field"><label>Deposit Processing</label><select id="set-dep-mode"><option value="instant">Instant (Simulated)</option><option>Manual Approval</option></select></div>
+            <button class="btn-primary" style="padding:11px 24px;" onclick="saveSettings()">Save Settings</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT METHODS EDITOR -->
+      <div class="admin-section" id="section-payment-methods">
+        <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:6px;">Payment Methods</h2>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;">Edit the deposit method details shown to clients on the Deposit page. Changes take effect immediately.</p>
+
+        <div id="payment-methods-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:28px;"></div>
+
+        <!-- ADD NEW METHOD -->
+        <div class="page-editor" style="border:2px dashed var(--border);">
+          <h3 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;">➕ Add New Payment Method</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="page-field"><label>Method ID (unique, no spaces)</label><input type="text" id="new-pm-id" placeholder="e.g. eth, bnb, wire"/></div>
+            <div class="page-field"><label>Icon (emoji)</label><input type="text" id="new-pm-icon" placeholder="🔷"/></div>
+            <div class="page-field"><label>Method Name</label><input type="text" id="new-pm-name" placeholder="e.g. Ethereum (ETH)"/></div>
+            <div class="page-field"><label>Subtitle</label><input type="text" id="new-pm-sub" placeholder="e.g. ERC-20 Network"/></div>
+            <div class="page-field"><label>Badge Text (optional)</label><input type="text" id="new-pm-badge" placeholder="e.g. Fast"/></div>
+            <div class="page-field"><label>Badge Color</label><select id="new-pm-badge-color"><option value="var(--green)">Green</option><option value="var(--blue)">Blue</option><option value="var(--gold)">Gold</option><option value="var(--red)">Red</option></select></div>
+          </div>
+          <div class="page-field"><label>Note (shown below details)</label><input type="text" id="new-pm-note" placeholder="e.g. Funds credited after 12 confirmations"/></div>
+          <div id="new-pm-fields" style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:10px;">Detail Fields</label>
+            <div id="new-pm-fields-list" style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;">
+                <input type="text" placeholder="Label (e.g. Wallet Address)" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/>
+                <input type="text" placeholder="Value" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/>
+                <button onclick="addPMFieldRow()" style="background:var(--green2);border:none;color:var(--green);font-size:18px;width:36px;height:36px;border-radius:8px;cursor:pointer;">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" style="padding:11px 24px;" onclick="addPaymentMethod()">Add Payment Method</button>
+        </div>
+      </div>
+
+      <!-- MARKET SETTINGS -->
+      <div class="admin-section" id="section-markets-admin">
+        <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:20px;">Market Settings</h2>
+        <div class="page-editor">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;" id="market-toggle-grid"></div>
+          <h3 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;">Add Custom Asset</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:12px;align-items:end;">
+            <div class="page-field" style="margin:0"><label>Symbol</label><input type="text" id="new-sym" placeholder="e.g. TSLA"/></div>
+            <div class="page-field" style="margin:0"><label>Name</label><input type="text" id="new-name" placeholder="Tesla Inc."/></div>
+            <div class="page-field" style="margin:0"><label>Price</label><input type="number" id="new-price" placeholder="248.50"/></div>
+            <div class="page-field" style="margin:0"><label>Type</label><select id="new-type"><option value="stocks">Stocks</option><option value="crypto">Crypto</option><option value="forex">Forex</option><option value="commodities">Commodities</option></select></div>
+            <button class="btn-primary" style="padding:13px;" onclick="addAsset()">Add Asset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="admin-section" id="section-settings">
+        <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:20px;">System Settings</h2>
+        <div class="page-editor">
+          <div class="page-field"><label>Platform Name</label><input type="text" value="Orident Inc"/></div>
+          <div class="page-field"><label>Support Email</label><input type="text" value="oridentinc@proton.me"/></div>
+          <div class="page-field"><label>Admin Password</label><input type="password" placeholder="Change admin password..."/></div>
+          <button class="btn-primary" style="padding:11px 24px;" onclick="showToast('Settings saved','success','✅')">Save</button>
+        </div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="admin-section" id="section-logs">
+        <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:20px;">Activity Logs</h2>
+        <div class="table-wrap"><div id="logs-list" style="padding:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);line-height:2;"></div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADJUST MODAL -->
+<div class="modal-overlay adj-modal" id="adj-modal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Adjust Balance</h3><button class="modal-close" onclick="closeAdj()">✕</button></div>
+    <div class="modal-body">
+      <div id="adj-user-info" style="background:var(--surface);border-radius:8px;padding:14px;margin-bottom:18px;font-size:14px;"></div>
+      <div class="adj-type-grid">
+        <div class="adj-type active" id="adj-add" onclick="setAdjType('add',this)"><div class="icon">➕</div><div class="label">Add Funds</div></div>
+        <div class="adj-type" id="adj-sub" onclick="setAdjType('sub',this)"><div class="icon">➖</div><div class="label">Deduct Funds</div></div>
+        <div class="adj-type" id="adj-set" onclick="setAdjType('set',this)"><div class="icon">✏️</div><div class="label">Set Balance</div></div>
+        <div class="adj-type" id="adj-bonus" onclick="setAdjType('bonus',this)"><div class="icon">🎁</div><div class="label">Add Bonus</div></div>
+      </div>
+      <div class="form-group"><label>Amount (USD)</label><input type="number" id="adj-amount" placeholder="Enter amount..."/></div>
+      <div class="form-group"><label>Internal Note</label><input type="text" id="adj-note" placeholder="Reason for adjustment..."/></div>
+      <button class="btn-primary" style="width:100%;justify-content:center;padding:14px;" onclick="confirmAdj()">Apply Adjustment</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const ADMIN_CREDS={user:'orident_admin',pass:'OridentAdmin2025'};
+let adjTarget=null,adjType='add',adminLogs=[];
+
+function adminLogin(){
+  const u=document.getElementById('admin-user').value;
+  const p=document.getElementById('admin-pass').value;
+  if(u===ADMIN_CREDS.user&&p===ADMIN_CREDS.pass){
+    document.getElementById('admin-login-screen').classList.remove('show');
+    document.getElementById('admin-panel').classList.add('show');
+    initAdmin();
+    log('Admin logged in');
+  } else {
+    const el=document.getElementById('admin-alert');
+    el.className='alert-box error';el.textContent='Invalid credentials.';el.style.display='block';
+  }
+}
+function adminLogout(){document.getElementById('admin-panel').classList.remove('show');document.getElementById('admin-login-screen').classList.add('show');}
+
+function initAdmin(){
+  renderAdminKPIs();renderUsers();renderAccounts();renderDeposits();renderWithdrawals();renderMarketToggles();renderLogs();renderOverviewWidgets();
+}
+
+function showSection(s,el){
+  document.querySelectorAll('.admin-section').forEach(sec=>sec.classList.remove('active'));
+  document.querySelectorAll('.s-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('section-'+s).classList.add('active');
+  el.classList.add('active');
+  if(s==='users') renderUsers();
+  if(s==='accounts') renderAccounts();
+  if(s==='deposits') renderDeposits();
+  if(s==='withdrawals') renderWithdrawals();
+  if(s==='logs') renderLogs();
+}
+
+function getUsers(){return Object.values(JSON.parse(localStorage.getItem('orident_users')||'{}'));}
+
+function renderAdminKPIs(){
+  const users=getUsers();
+  const totalBal=users.reduce((s,u)=>s+(u.balance||0),0);
+  const totalDep=users.reduce((s,u)=>s+((u.deposits||[]).reduce((a,d)=>a+d.amount,0)),0);
+  const pendingWit=users.reduce((s,u)=>s+((u.withdrawals||[]).filter(w=>w.status==='pending').length),0);
+  document.getElementById('admin-kpis').innerHTML=`
+    <div class="admin-kpi"><div class="k-label">Total Users</div><div class="k-val">${users.length}</div><div class="k-sub">Registered accounts</div></div>
+    <div class="admin-kpi"><div class="k-label">Total Balance</div><div class="k-val">$${fmt(totalBal)}</div><div class="k-sub">All user accounts</div></div>
+    <div class="admin-kpi"><div class="k-label">Total Deposits</div><div class="k-val">$${fmt(totalDep)}</div><div class="k-sub">All time</div></div>
+    <div class="admin-kpi"><div class="k-label">Pending Withdrawals</div><div class="k-val" style="color:${pendingWit>0?'var(--red)':'var(--green)'}">${pendingWit}</div><div class="k-sub">Awaiting approval</div></div>
+    <div class="admin-kpi"><div class="k-label">Active Markets</div><div class="k-val">8</div><div class="k-sub">Asset classes</div></div>
+  `;
+}
+
+function renderOverviewWidgets(){
+  const users=getUsers();
+  document.getElementById('recent-reg').innerHTML=users.slice(-5).reverse().map(u=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="font-weight:600">${u.firstName} ${u.lastName}</span><span style="color:var(--muted)">${u.country||'—'}</span></div>`).join('')||'<p style="color:var(--muted);font-size:13px;">No users yet.</p>';
+  const allDeps=users.flatMap(u=>(u.deposits||[]).map(d=>({...d,name:u.firstName+' '+u.lastName})));
+  document.getElementById('recent-dep').innerHTML=allDeps.slice(-5).reverse().map(d=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="font-weight:600">${d.name}</span><span style="color:var(--green);font-family:'DM Mono',monospace">+$${fmt(d.amount)}</span></div>`).join('')||'<p style="color:var(--muted);font-size:13px;">No deposits yet.</p>';
+}
+
+function renderUsers(){
+  const q=(document.getElementById('user-search')?.value||'').toLowerCase();
+  const users=getUsers().filter(u=>!q||(u.email||'').includes(q)||(u.firstName||'').toLowerCase().includes(q));
+  document.getElementById('users-tbody').innerHTML=users.length?users.map(u=>`<tr>
+    <td style="font-weight:600">${u.firstName||''} ${u.lastName||''}</td>
+    <td style="color:var(--muted)">${u.email}</td>
+    <td>${u.country||'—'}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--green)">$${fmt(u.balance||0)}</td>
+    <td style="color:var(--muted)">${u.joinDate?new Date(u.joinDate).toLocaleDateString():'—'}</td>
+    <td><span class="status-badge status-completed">Active</span></td>
+    <td><div class="action-btns"><button class="act-btn act-edit" onclick="openAdj('${u.email}')">Adjust</button><button class="act-btn act-ban">Suspend</button></div></td>
+  </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">No users registered yet.</td></tr>';
+}
+
+function renderAccounts(){
+  const users=getUsers();
+  document.getElementById('accounts-tbody').innerHTML=users.length?users.map(u=>{
+    const totDep=(u.deposits||[]).reduce((s,d)=>s+d.amount,0);
+    const totWit=(u.withdrawals||[]).reduce((s,w)=>s+w.amount,0);
+    return `<tr>
+      <td style="font-weight:600">${u.firstName||''} ${u.lastName||''}</td>
+      <td style="color:var(--muted)">${u.email}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700">$${fmt(u.balance||0)}</td>
+      <td style="color:var(--green);font-family:'DM Mono',monospace">$${fmt(totDep)}</td>
+      <td style="color:var(--red);font-family:'DM Mono',monospace">$${fmt(totWit)}</td>
+      <td><span class="badge badge-blue">Standard</span></td>
+      <td><button class="act-btn act-add" onclick="openAdj('${u.email}')">Adjust Balance</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">No accounts yet.</td></tr>';
+}
+
+function renderDeposits(){
+  const users=getUsers();
+  const allDeps=users.flatMap(u=>(u.deposits||[]).map(d=>({...d,email:u.email,name:u.firstName+' '+u.lastName})));
+  document.getElementById('deposits-tbody').innerHTML=allDeps.length?allDeps.reverse().map(d=>`<tr>
+    <td style="font-weight:600">${d.name}<div style="font-size:11px;color:var(--muted)">${d.email}</div></td>
+    <td style="color:var(--muted)">${new Date(d.date).toLocaleDateString()}</td>
+    <td>${d.method||'—'}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--green)">$${fmt(d.amount)}</td>
+    <td><span class="status-badge status-${d.status}">${d.status}</span></td>
+    <td><button class="act-btn act-add" onclick="showToast('Deposit approved','success','✅')">Approve</button></td>
+  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No deposits yet.</td></tr>';
+}
+
+function renderWithdrawals(){
+  const users=getUsers();
+  const allWits=users.flatMap(u=>(u.withdrawals||[]).map(w=>({...w,email:u.email,name:u.firstName+' '+u.lastName})));
+  const pending=allWits.filter(w=>w.status==='pending').length;
+  const badge=document.getElementById('pending-wit-badge');
+  if(badge) badge.textContent=pending+' Pending';
+  document.getElementById('withdrawals-tbody').innerHTML=allWits.length?allWits.reverse().map(w=>`<tr>
+    <td style="font-weight:600">${w.name}<div style="font-size:11px;color:var(--muted)">${w.email}</div></td>
+    <td style="color:var(--muted)">${new Date(w.date).toLocaleDateString()}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">$${fmt(w.amount)}</td>
+    <td style="color:var(--muted);font-size:12px">${w.dest||'—'}</td>
+    <td><span class="status-badge status-${w.status}">${w.status}</span></td>
+    <td><div class="action-btns">
+      ${w.status==='pending'?`<button class="act-btn act-add" onclick="approveWit('${w.email}','${w.date}')">Approve</button><button class="act-btn act-sub" onclick="denyWit('${w.email}','${w.date}')">Deny</button>`:'<span style="color:var(--muted);font-size:12px">Processed</span>'}
+    </div></td>
+  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No withdrawals yet.</td></tr>';
+}
+
+function approveWit(email,date){
+  const users=JSON.parse(localStorage.getItem('orident_users')||'{}');
+  if(users[email]){
+    const wit=users[email].withdrawals?.find(w=>w.date===date);
+    if(wit){wit.status='completed';localStorage.setItem('orident_users',JSON.stringify(users));}
+  }
+  showToast('Withdrawal approved','success','✅');renderWithdrawals();log('Withdrawal approved for '+email);
+}
+function denyWit(email,date){
+  const users=JSON.parse(localStorage.getItem('orident_users')||'{}');
+  if(users[email]){
+    const wit=users[email].withdrawals?.find(w=>w.date===date);
+    if(wit){
+      users[email].balance=(users[email].balance||0)+wit.amount;
+      wit.status='failed';
+      localStorage.setItem('orident_users',JSON.stringify(users));
+    }
+  }
+  showToast('Withdrawal denied, funds returned','error','❌');renderWithdrawals();
+}
+function approveAllDeposits(){showToast('All pending deposits approved','success','✅');renderDeposits();}
+
+function openAdj(email){
+  const users=JSON.parse(localStorage.getItem('orident_users')||'{}');
+  adjTarget=users[email];
+  if(!adjTarget)return;
+  document.getElementById('adj-user-info').innerHTML=`<strong>${adjTarget.firstName} ${adjTarget.lastName}</strong> · ${email}<br/><span style="color:var(--muted)">Current Balance: </span><strong>$${fmt(adjTarget.balance||0)}</strong>`;
+  adjType='add';
+  ['add','sub','set','bonus'].forEach(t=>document.getElementById('adj-'+t).classList.toggle('active',t==='add'));
+  document.getElementById('adj-amount').value='';
+  document.getElementById('adj-note').value='';
+  document.getElementById('adj-modal').classList.add('open');
+}
+function closeAdj(){document.getElementById('adj-modal').classList.remove('open');}
+function setAdjType(t,el){
+  adjType=t;
+  ['add','sub','set','bonus'].forEach(x=>document.getElementById('adj-'+x).classList.remove('active'));
+  el.classList.add('active');
+}
+function confirmAdj(){
+  const amt=parseFloat(document.getElementById('adj-amount').value)||0;
+  if(!amt){showToast('Enter an amount','error','⚠️');return;}
+  const users=JSON.parse(localStorage.getItem('orident_users')||'{}');
+  const u=users[adjTarget.email];
+  if(!u)return;
+  if(adjType==='add'||adjType==='bonus') u.balance=(u.balance||0)+amt;
+  else if(adjType==='sub') u.balance=Math.max(0,(u.balance||0)-amt);
+  else if(adjType==='set') u.balance=amt;
+  localStorage.setItem('orident_users',JSON.stringify(users));
+  closeAdj();
+  showToast('Balance updated: $'+fmt(u.balance),'success','✅');
+  log(`Balance adjusted for ${u.email}: ${adjType} $${amt}`);
+  renderAdminKPIs();renderAccounts();renderUsers();
+}
+document.getElementById('adj-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAdj();});
+
+function renderMarketToggles(){
+  const markets=['Stocks','Crypto','Forex','Indices','Commodities','REITs','Real Estate','AI & Biotech'];
+  document.getElementById('market-toggle-grid').innerHTML=markets.map(m=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:13px;font-weight:600">${m}</span>
+      <div style="width:36px;height:20px;background:var(--green);border-radius:10px;cursor:pointer;position:relative;transition:background .2s;" onclick="toggleMarket(this)">
+        <div style="width:16px;height:16px;background:white;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);"></div>
+      </div>
+    </div>`).join('');
+}
+function toggleMarket(el){el.style.background=el.style.background==='var(--green)'?'var(--border)':'var(--green)';showToast('Market setting updated','success','✅');}
+
+function addAsset(){
+  const sym=document.getElementById('new-sym').value.trim();
+  const name=document.getElementById('new-name').value.trim();
+  const price=parseFloat(document.getElementById('new-price').value)||0;
+  const type=document.getElementById('new-type').value;
+  if(!sym||!name||!price){showToast('Fill in all fields','error','⚠️');return;}
+  ASSETS[type].push({sym,name,price,chg:0,pct:0,sector:'Custom'});
+  showToast(sym+' added to '+type,'success','✅');
+  ['new-sym','new-name','new-price'].forEach(id=>document.getElementById(id).value='');
+  log('Asset added: '+sym+' ('+type+')');
+}
+
+function log(msg){adminLogs.unshift('['+new Date().toLocaleTimeString()+'] '+msg);renderLogs();}
+function renderLogs(){const el=document.getElementById('logs-list');if(el)el.innerHTML=adminLogs.length?adminLogs.join('<br/>'):'No activity logged yet.';}
+function savePage(){showToast('Page content saved','success','✅');log('Homepage content updated');}
+function saveSettings(){showToast('Platform settings saved','success','✅');log('Platform settings updated');}
+
+// ── PAYMENT METHODS ADMIN ──────────────────────────────────────
+const DEFAULT_PM = [
+  {id:'bank',icon:'🏦',name:'Bank Transfer',sub:'ACH / SWIFT Wire',badge:'No Fee',badgeColor:'var(--green)',note:'Bank transfers take 1–3 business days to reflect in your account.',fields:[{label:'Bank Name',val:'Chase Bank, N.A.'},{label:'Account Name',val:'Orident Inc LLC'},{label:'Account Number',val:'****4892'},{label:'Routing Number (ACH)',val:'021000021'},{label:'SWIFT Code',val:'CHASUS33'},{label:'Reference',val:'Use your registered email as reference'}]},
+  {id:'card',icon:'💳',name:'Card Payment',sub:'Visa / Mastercard / Amex',badge:'Instant',badgeColor:'#3A3A3A',note:'Card deposits are credited instantly to your Orident account.',fields:[{label:'Accepted Cards',val:'Visa, Mastercard, American Express'},{label:'Processing Fee',val:'2.5%'},{label:'Min Deposit',val:'$50'},{label:'Max per Transaction',val:'$10,000'}]},
+  {id:'usdt',icon:'💠',name:'USDT (TRC-20)',sub:'Tether Stablecoin',badge:'Fast',badgeColor:'var(--green)',note:'USDT deposits are credited after 12 network confirmations.',fields:[{label:'Network',val:'TRON (TRC-20)'},{label:'Wallet Address',val:'TQn9Y2khEsLJW1ChVWFMSMeRDow5LQMA7J'},{label:'Minimum',val:'$50 USDT'},{label:'Confirmations Required',val:'12'}]},
+  {id:'btc',icon:'₿',name:'Bitcoin (BTC)',sub:'Cryptocurrency',badge:'No Fee',badgeColor:'var(--gold)',note:'BTC deposits are credited after 3 network confirmations (~30–60 min).',fields:[{label:'Network',val:'Bitcoin (BTC) — Native SegWit'},{label:'Wallet Address',val:'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'},{label:'Minimum',val:'$100 USD equivalent'},{label:'Confirmations Required',val:'3'}]},
+  {id:'paypal',icon:'🅿️',name:'PayPal',sub:'PayPal Transfer',badge:'Instant',badgeColor:'#3A3A3A',note:'Send to the PayPal email above and include your registered email in the note field.',fields:[{label:'PayPal Email',val:'payments@oridentinc.com'},{label:'Processing Fee',val:'None'},{label:'Min Deposit',val:'$20'},{label:'Note',val:'Include your registered email in the PayPal note'}]},
+];
+
+function getPMethods(){try{const s=localStorage.getItem('orident_payment_methods');return s?JSON.parse(s):[...DEFAULT_PM];}catch(e){return[...DEFAULT_PM];}}
+function savePMethods(arr){localStorage.setItem('orident_payment_methods',JSON.stringify(arr));}
+
+function renderPaymentMethods(){
+  const el=document.getElementById('payment-methods-list');
+  if(!el) return;
+  const methods=getPMethods();
+  if(!methods.length){el.innerHTML='<p style="color:var(--muted);font-size:14px;">No payment methods configured.</p>';return;}
+  el.innerHTML=methods.map((m,i)=>`
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--surface);background:var(--surface);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:24px;">${m.icon}</span>
+          <div><div style="font-weight:700;font-size:15px;color:var(--ink);">${m.name}</div><div style="font-size:12px;color:var(--muted);">${m.sub} · ID: ${m.id}</div></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="background:${m.badgeColor}20;color:${m.badgeColor};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;">${m.badge||''}</span>
+          <button onclick="togglePMEdit(${i})" style="padding:7px 14px;background:var(--surface);color:var(--ink);border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Edit</button>
+          <button onclick="deletePM(${i})" style="padding:7px 14px;background:var(--red2);color:var(--red);border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Delete</button>
+        </div>
+      </div>
+      <div id="pm-edit-${i}" style="display:none;padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="page-field" style="margin:0;"><label>Icon</label><input type="text" id="pm-icon-${i}" value="${m.icon}"/></div>
+          <div class="page-field" style="margin:0;"><label>Method Name</label><input type="text" id="pm-name-${i}" value="${m.name}"/></div>
+          <div class="page-field" style="margin:0;"><label>Subtitle</label><input type="text" id="pm-sub-${i}" value="${m.sub}"/></div>
+          <div class="page-field" style="margin:0;"><label>Badge Text</label><input type="text" id="pm-badge-${i}" value="${m.badge||''}"/></div>
+        </div>
+        <div class="page-field"><label>Note</label><input type="text" id="pm-note-${i}" value="${m.note||''}"/></div>
+        <label style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:10px;">Detail Fields</label>
+        <div id="pm-fields-${i}" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          ${m.fields.map((f,fi)=>`
+            <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;">
+              <input type="text" value="${f.label}" id="pm-fl-${i}-${fi}" placeholder="Label" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/>
+              <input type="text" value="${f.val}" id="pm-fv-${i}-${fi}" placeholder="Value" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/>
+              <button onclick="removePMField(${i},${fi})" style="background:var(--red2);border:none;color:var(--red);font-size:16px;width:36px;height:36px;border-radius:8px;cursor:pointer;">✕</button>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button onclick="addPMFieldToExisting(${i})" style="padding:8px 16px;background:var(--green2);color:var(--green);border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;">+ Add Field</button>
+          <button onclick="savePMEdit(${i})" class="btn-primary" style="padding:9px 20px;">Save Changes</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function togglePMEdit(i){
+  const el=document.getElementById('pm-edit-'+i);
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function savePMEdit(i){
+  const methods=getPMethods();
+  const m=methods[i];
+  m.icon=document.getElementById('pm-icon-'+i).value;
+  m.name=document.getElementById('pm-name-'+i).value;
+  m.sub=document.getElementById('pm-sub-'+i).value;
+  m.badge=document.getElementById('pm-badge-'+i).value;
+  m.note=document.getElementById('pm-note-'+i).value;
+  // Collect fields
+  const fieldRows=document.getElementById('pm-fields-'+i).querySelectorAll('[id^="pm-fl-'+i+'"]');
+  m.fields=Array.from(fieldRows).map((_,fi)=>({
+    label:document.getElementById('pm-fl-'+i+'-'+fi)?.value||'',
+    val:document.getElementById('pm-fv-'+i+'-'+fi)?.value||''
+  })).filter(f=>f.label);
+  methods[i]=m;
+  savePMethods(methods);
+  renderPaymentMethods();
+  showToast(m.name+' updated successfully','success','✅');
+  log('Payment method updated: '+m.name);
+}
+
+function deletePM(i){
+  const methods=getPMethods();
+  const name=methods[i].name;
+  if(!confirm('Delete "'+name+'"? This will remove it from the deposit page.')) return;
+  methods.splice(i,1);
+  savePMethods(methods);
+  renderPaymentMethods();
+  showToast(name+' deleted','info','🗑️');
+  log('Payment method deleted: '+name);
+}
+
+function addPMFieldToExisting(i){
+  const container=document.getElementById('pm-fields-'+i);
+  const rows=container.querySelectorAll('[id^="pm-fl-'+i+'"]');
+  const fi=rows.length;
+  const div=document.createElement('div');
+  div.style.cssText='display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;';
+  div.innerHTML=`<input type="text" id="pm-fl-${i}-${fi}" placeholder="Label" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/><input type="text" id="pm-fv-${i}-${fi}" placeholder="Value" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/><button onclick="this.parentElement.remove()" style="background:var(--red2);border:none;color:var(--red);font-size:16px;width:36px;height:36px;border-radius:8px;cursor:pointer;">✕</button>`;
+  container.appendChild(div);
+}
+
+function addPMFieldRow(){
+  const container=document.getElementById('new-pm-fields-list');
+  const rows=container.querySelectorAll('input[placeholder^="Label"]');
+  const div=document.createElement('div');
+  div.style.cssText='display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;';
+  div.innerHTML=`<input type="text" placeholder="Label (e.g. Wallet Address)" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/><input type="text" placeholder="Value" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/><button onclick="this.parentElement.remove()" style="background:var(--red2);border:none;color:var(--red);font-size:16px;width:36px;height:36px;border-radius:8px;cursor:pointer;">✕</button>`;
+  container.appendChild(div);
+}
+
+function addPaymentMethod(){
+  const id=document.getElementById('new-pm-id').value.trim().replace(/\s+/g,'_');
+  const icon=document.getElementById('new-pm-icon').value.trim();
+  const name=document.getElementById('new-pm-name').value.trim();
+  const sub=document.getElementById('new-pm-sub').value.trim();
+  const badge=document.getElementById('new-pm-badge').value.trim();
+  const badgeColor=document.getElementById('new-pm-badge-color').value;
+  const note=document.getElementById('new-pm-note').value.trim();
+  if(!id||!name){showToast('ID and Name are required','error','⚠️');return;}
+  const methods=getPMethods();
+  if(methods.find(m=>m.id===id)){showToast('A method with this ID already exists','error','⚠️');return;}
+  // Collect fields from new-pm-fields-list
+  const fieldContainer=document.getElementById('new-pm-fields-list');
+  const labelInputs=fieldContainer.querySelectorAll('input[placeholder^="Label"]');
+  const valueInputs=fieldContainer.querySelectorAll('input[placeholder="Value"]');
+  const fields=Array.from(labelInputs).map((l,i)=>({label:l.value.trim(),val:valueInputs[i]?.value.trim()||''})).filter(f=>f.label);
+  const newMethod={id,icon:icon||'💳',name,sub:sub||'',badge,badgeColor,note,fields};
+  methods.push(newMethod);
+  savePMethods(methods);
+  renderPaymentMethods();
+  ['new-pm-id','new-pm-icon','new-pm-name','new-pm-sub','new-pm-badge','new-pm-note'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('new-pm-fields-list').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;"><input type="text" placeholder="Label (e.g. Wallet Address)" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/><input type="text" placeholder="Value" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;"/><button onclick="addPMFieldRow()" style="background:var(--green2);border:none;color:var(--green);font-size:18px;width:36px;height:36px;border-radius:8px;cursor:pointer;">+</button></div>`;
+  showToast(name+' added to deposit methods!','success','✅');
+  log('New payment method added: '+name);
+}
+
+function removePMField(mi,fi){
+  const container=document.getElementById('pm-fields-'+mi);
+  const rows=container.children;
+  if(rows.length>fi) rows[fi].remove();
+}
+
+// Init payment methods on section load
+const pmObserver=new MutationObserver(()=>{
+  if(document.getElementById('section-payment-methods')?.classList.contains('active')) renderPaymentMethods();
+});
+pmObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+
+// ── ADMIN TRADE MANAGEMENT ─────────────────────────────────────
+function getAllTrades(){
+  const users=Auth.users;
+  const all=[];
+  Object.values(users).forEach(u=>{
+    const trades=u.trades||[];
+    trades.forEach(t=>all.push({...t,userEmail:u.email,userName:(u.firstName||'')+' '+(u.lastName||u.name||u.email.split('@')[0])}));
+  });
+  return all.sort((a,b)=>new Date(b.date)-new Date(a.date));
+}
+
+function renderTradesAdmin(){
+  const tbody=document.getElementById('trades-tbody');
+  if(!tbody)return;
+  const trades=getAllTrades();
+  if(!trades.length){
+    tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">No trades yet. Use "Place Trade for User" to add positions.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=trades.map((t,i)=>`
+    <tr>
+      <td><div style="font-weight:600;font-size:13px;">${t.userName}</div><div style="font-size:11px;color:var(--muted)">${t.userEmail}</div></td>
+      <td><strong>${t.sym||'—'}</strong></td>
+      <td><span style="padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;background:${t.dir==='BUY'?'var(--green2)':'var(--red2)'};color:${t.dir==='BUY'?'var(--green)':'var(--red)'}">${t.dir||'—'}</span></td>
+      <td>${t.qty||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;">$${Number(t.entry||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
+      <td style="font-family:'DM Mono',monospace;color:${(t.pnl||0)>=0?'var(--green)':'var(--red)'};font-weight:700;">${t.pnl!=null?((t.pnl>=0?'+':'')+fmtUSD(t.pnl)):'—'}</td>
+      <td><span style="padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;background:${t.status==='OPEN'?'var(--green2)':t.status==='CLOSED'?'#f5f5f5':'var(--gold2)'};color:${t.status==='OPEN'?'var(--green)':t.status==='CLOSED'?'var(--muted)':'var(--gold)'}">${t.status||'—'}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${t.date?new Date(t.date).toLocaleDateString():''}</td>
+      <td>
+        <button onclick="editTrade('${t.userEmail}','${t.id}')" style="padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;margin-right:4px;">Edit</button>
+        <button onclick="deleteTrade('${t.userEmail}','${t.id}')" style="padding:5px 10px;background:var(--red2);color:var(--red);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function showPlaceTradeModal(){
+  // Populate user select
+  const sel=document.getElementById('pt-user-select');
+  sel.innerHTML='<option value="">— Select a user —</option>';
+  Object.values(Auth.users).forEach(u=>{
+    const name=(u.firstName||u.name||u.email.split('@')[0]);
+    sel.innerHTML+=`<option value="${u.email}">${name} (${u.email})</option>`;
+  });
+  // Set default datetime to now
+  const now=new Date();
+  now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('pt-datetime').value=now.toISOString().slice(0,16);
+  document.getElementById('place-trade-modal').style.display='flex';
+  document.getElementById('place-trade-alert').style.display='none';
+}
+
+document.getElementById('pt-user-select')?.addEventListener('change',function(){
+  const u=Auth.users[this.value];
+  const info=document.getElementById('pt-user-info');
+  const bal=document.getElementById('pt-balance');
+  if(u){info.style.display='block';bal.textContent='$'+Number(u.balance||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  else{info.style.display='none';}
+});
+document.getElementById('pt-symbol')?.addEventListener('change',function(){
+  document.getElementById('pt-custom-wrap').style.display=this.value==='CUSTOM'?'block':'none';
+});
+
+function adminPlaceTrade(){
+  const email=document.getElementById('pt-user-select').value;
+  let sym=document.getElementById('pt-symbol').value;
+  if(sym==='CUSTOM') sym=document.getElementById('pt-custom-sym').value.trim().toUpperCase();
+  const dir=document.getElementById('pt-direction').value;
+  const orderType=document.getElementById('pt-order-type').value;
+  const entry=parseFloat(document.getElementById('pt-entry').value);
+  const qty=parseFloat(document.getElementById('pt-qty').value);
+  const sl=document.getElementById('pt-sl').value?parseFloat(document.getElementById('pt-sl').value):null;
+  const tp=document.getElementById('pt-tp').value?parseFloat(document.getElementById('pt-tp').value):null;
+  const status=document.getElementById('pt-status').value;
+  const pnl=document.getElementById('pt-pnl').value!==''?parseFloat(document.getElementById('pt-pnl').value):null;
+  const dateVal=document.getElementById('pt-datetime').value;
+  const note=document.getElementById('pt-note').value;
+  const alertEl=document.getElementById('place-trade-alert');
+
+  if(!email){alertEl.style.display='block';alertEl.style.background='#FDE8E6';alertEl.style.color='#D93025';alertEl.textContent='Please select a user.';return;}
+  if(!sym){alertEl.style.display='block';alertEl.style.background='#FDE8E6';alertEl.style.color='#D93025';alertEl.textContent='Please enter a symbol.';return;}
+  if(!entry||!qty){alertEl.style.display='block';alertEl.style.background='#FDE8E6';alertEl.style.color='#D93025';alertEl.textContent='Please enter entry price and quantity.';return;}
+
+  const user=Auth.users[email];
+  if(!user){alertEl.style.display='block';alertEl.style.background='#FDE8E6';alertEl.style.color='#D93025';alertEl.textContent='User not found.';return;}
+
+  const tradeValue=entry*qty;
+  const tradeId='TRD_'+Date.now()+'_'+Math.random().toString(36).slice(2,7).toUpperCase();
+
+  const trade={
+    id:tradeId,sym,dir,orderType,entry,qty,sl,tp,status,pnl,
+    date:dateVal?new Date(dateVal).toISOString():new Date().toISOString(),
+    note,adminPlaced:true
+  };
+
+  if(!user.trades) user.trades=[];
+  user.trades.unshift(trade);
+
+  // Adjust portfolio value and balance for closed trades
+  if(status==='CLOSED'&&pnl!=null){
+    user.balance=(user.balance||0)+pnl;
+    if(!user.totalPnl) user.totalPnl=0;
+    user.totalPnl+=pnl;
+  }
+
+  // Update portfolio positions for open trades
+  if(status==='OPEN'){
+    if(!user.portfolio) user.portfolio={};
+    user.portfolio[sym]={sym,qty,entry,dir,tradeId,openDate:trade.date};
+  }
+
+  // Add to transactions
+  if(!user.transactions) user.transactions=[];
+  user.transactions.unshift({
+    type:'TRADE',desc:`Admin placed ${dir} ${qty}x ${sym} @ $${entry}`,
+    amount:status==='CLOSED'&&pnl!=null?pnl:-(tradeValue),
+    date:trade.date,id:tradeId
+  });
+
+  Auth.users[email]=user;
+  Auth.save();
+
+  log(`Admin placed trade: ${dir} ${qty}x ${sym} @ $${entry} for ${email} — Status: ${status}`);
+  showToast(`Trade placed: ${dir} ${qty}x ${sym} for ${user.firstName||email}`,'success','📈');
+  document.getElementById('place-trade-modal').style.display='none';
+  renderTradesAdmin();
+  renderAdminKPIs();
+}
+
+function editTrade(email,tradeId){
+  const user=Auth.users[email];
+  if(!user) return;
+  const trade=(user.trades||[]).find(t=>t.id===tradeId);
+  if(!trade) return;
+  document.getElementById('et-trade-id').value=tradeId;
+  document.getElementById('et-user-email').value=email;
+  document.getElementById('et-status').value=trade.status||'OPEN';
+  document.getElementById('et-close-price').value=trade.closePrice||'';
+  document.getElementById('et-pnl').value=trade.pnl!=null?trade.pnl:'';
+  document.getElementById('et-note').value=trade.note||'';
+  document.getElementById('edit-trade-modal').style.display='flex';
+}
+
+function saveTradeEdit(){
+  const email=document.getElementById('et-user-email').value;
+  const tradeId=document.getElementById('et-trade-id').value;
+  const user=Auth.users[email];
+  if(!user) return;
+  const idx=(user.trades||[]).findIndex(t=>t.id===tradeId);
+  if(idx<0) return;
+  const oldPnl=user.trades[idx].pnl;
+  const newStatus=document.getElementById('et-status').value;
+  const closePrice=document.getElementById('et-close-price').value?parseFloat(document.getElementById('et-close-price').value):null;
+  const newPnl=document.getElementById('et-pnl').value!==''?parseFloat(document.getElementById('et-pnl').value):null;
+  const note=document.getElementById('et-note').value;
+
+  // Reverse old P&L if was closed with pnl, now update
+  if(user.trades[idx].status==='CLOSED'&&oldPnl!=null) user.balance=(user.balance||0)-oldPnl;
+
+  user.trades[idx]={...user.trades[idx],status:newStatus,closePrice,pnl:newPnl,note};
+
+  if(newStatus==='CLOSED'&&newPnl!=null){
+    user.balance=(user.balance||0)+newPnl;
+    user.trades[idx].closeDate=new Date().toISOString();
+  }
+
+  Auth.users[email]=user;
+  Auth.save();
+  log(`Admin edited trade ${tradeId} for ${email}: status=${newStatus}, P&L=${newPnl}`);
+  showToast('Trade updated successfully','success','✅');
+  document.getElementById('edit-trade-modal').style.display='none';
+  renderTradesAdmin();
+}
+
+function deleteTrade(email,tradeId){
+  if(!confirm('Delete this trade? This cannot be undone.')) return;
+  const user=Auth.users[email];
+  if(!user) return;
+  const trade=(user.trades||[]).find(t=>t.id===tradeId);
+  if(trade&&trade.status==='CLOSED'&&trade.pnl!=null) user.balance=(user.balance||0)-trade.pnl;
+  user.trades=(user.trades||[]).filter(t=>t.id!==tradeId);
+  Auth.users[email]=user;
+  Auth.save();
+  log(`Admin deleted trade ${tradeId} for ${email}`);
+  showToast('Trade deleted','success','🗑️');
+  renderTradesAdmin();
+}
+
+// Hook into showSection to render trades
+const origShowSection=window.showSection;
+window.showSection=function(s,el){
+  if(typeof origShowSection==='function') origShowSection(s,el);
+  if(s==='trades') setTimeout(renderTradesAdmin,50);
+};
+
+</script>
+</body></html>

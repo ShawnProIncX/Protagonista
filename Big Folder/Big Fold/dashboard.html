@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard — Orident Inc</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+body{background:var(--surface);}
+.dash-wrap{max-width:1300px;margin:0 auto;padding:88px 4% 60px;}
+.dash-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
+.dash-greeting{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:var(--ink);}
+.dash-greeting span{color:var(--ink);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.kpi{background:white;border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:box-shadow .2s;}
+.kpi:hover{box-shadow:var(--shadow2);}
+.kpi-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.kpi-val{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.kpi-sub{font-size:12px;color:var(--muted);}
+.dash-grid{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start;}
+.portfolio-section{background:white;border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:20px;}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.section-hd h3{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--ink);}
+.empty-state{text-align:center;padding:40px;color:var(--muted);}
+.empty-state .icon{font-size:36px;margin-bottom:12px;}
+.empty-state p{font-size:14px;line-height:1.6;}
+.watch-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.watch-item:last-child{border-bottom:none;}
+.watch-sym{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--ink);}
+.watch-name{font-size:12px;color:var(--muted);}
+.watch-price{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;text-align:right;}
+.watch-chg{font-size:12px;text-align:right;}
+.watch-chg.up{color:var(--green);}
+.watch-chg.dn{color:var(--red);}
+.side-card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px;}
+.balance-display{background:linear-gradient(135deg,var(--blue),#0049CC);border-radius:12px;padding:24px;color:white;margin-bottom:16px;}
+.bal-label{font-size:12px;color:rgba(255,255,255,.65);margin-bottom:6px;}
+.bal-amount{font-family:'DM Mono',monospace;font-size:2rem;font-weight:700;}
+.bal-sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:6px;}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.qa-btn{padding:10px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:all .2s;}
+.qa-dep{background:var(--green2);color:var(--green);}
+.qa-dep:hover{background:var(--green);color:white;}
+.qa-wit{background:var(--surface);color:var(--slate);border:1px solid var(--border);}
+.qa-wit:hover{background:var(--ink);color:white;}
+.activity-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border-bottom:none;}
+.act-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.act-desc{font-size:13px;font-weight:500;color:var(--ink);}
+.act-time{font-size:11px;color:var(--muted);}
+.act-amount{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;margin-left:auto;}
+@media(max-width:1024px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.dash-grid{grid-template-columns:1fr;}}
+</style>
+</head><body>
+<div id="toast-container"></div>
+<nav class="orident-nav">
+  <a href="index.html" class="nav-logo"><div class="nav-logo-mark"><svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19 Q8 10 14 8 Q20 6 26 10 Q32 14 32 19 Q32 24 26 28 Q20 32 14 30 Q8 28 6 19Z" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M8 19 C8 13.5 11.5 9.5 16 9.5 C20.5 9.5 23 13 23 19 C23 25 20.5 28.5 16 28.5 C11.5 28.5 8 24.5 8 19Z" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M13.5 10 C13 9 12.5 8 11.5 7.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"/><path d="M18 9.6 C18.5 8.5 19 7.8 19.5 7" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-linecap="round"/><path d="M13 28 C12.5 29.2 12 30 11 31" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"/><path d="M27 9.5 L27 28.5" stroke="white" stroke-width="2.8" stroke-linecap="round"/><path d="M25 10 L29 10" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M24.5 9.5 C24 8.5 23.5 8 23 7.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29.5 9.5 C30 8.5 30.5 8 31 7" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M25 28.5 L29 28.5" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M25 29 C24.5 30 24 30.8 23.2 31.5" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29 29 C29.5 30 30 31 30.8 31.8" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M22 15 C24 14.5 26 14.8 27 15" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/><path d="M22 23 C24 23.2 26 23.1 27 23" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/></svg></div><span class="nav-logo-text">Orident<span>Inc</span></span></a>
+    <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="markets.html">Markets</a></li>
+    <li><a href="copy-trading.html">Copy Trading</a></li>
+    <li><a href="browse-tags.html">Browse Tags</a></li>
+  </ul>
+    <div class="nav-right">
+    <a href="login.html" class="btn-primary">Get Started →</a>
+  </div>
+</nav>
+
+<div class="dash-wrap">
+  <div class="dash-top">
+    <div><div class="dash-greeting">Good morning, <span id="user-first">Investor</span> 👋</div><p style="font-size:14px;color:var(--muted);margin-top:4px;" id="dash-date"></p></div>
+    <div class="live-badge" style="display:flex;align-items:center;gap:6px;background:var(--green2);color:var(--green);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;"><div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;"></div>Markets Open</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Portfolio Value</div><div class="kpi-val" id="kpi-portfolio">$10,000.00</div><div class="kpi-sub">Total invested + cash</div></div>
+    <div class="kpi"><div class="kpi-label">Available Balance</div><div class="kpi-val" id="kpi-balance">$10,000.00</div><div class="kpi-sub">Ready to invest</div></div>
+    <div class="kpi"><div class="kpi-label">Total P&amp;L</div><div class="kpi-val" id="kpi-pnl" style="color:var(--green)">+$0.00</div><div class="kpi-sub">All time returns</div></div>
+    <div class="kpi"><div class="kpi-label">Open Positions</div><div class="kpi-val" id="kpi-positions">0</div><div class="kpi-sub">Active trades</div></div>
+  </div>
+
+  <div class="dash-grid">
+    <div>
+      <!-- PORTFOLIO -->
+      <div class="portfolio-section">
+        <div class="section-hd"><h3>Portfolio</h3><a href="markets.html" class="btn-primary" style="padding:8px 16px;font-size:13px;text-decoration:none;">+ New Trade</a></div>
+        <div class="empty-state" id="portfolio-empty"><div class="icon">📊</div><p>No open positions yet.<br/>Start trading on the <a href="markets.html" style="color:var(--ink)">Markets page</a>.</p></div>
+        <div id="portfolio-positions" style="display:none;"></div>
+      </div>
+
+      <!-- WATCHLIST -->
+      <div class="portfolio-section">
+        <div class="section-hd"><h3>Watchlist</h3><a href="markets.html" style="font-size:13px;color:var(--ink);text-decoration:none;">+ Add Asset</a></div>
+        <div id="watchlist-items"></div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="portfolio-section">
+        <div class="section-hd"><h3>Recent Activity</h3></div>
+        <div id="activity-list">
+          <div class="activity-item"><div class="act-icon" style="background:var(--surface)">🎉</div><div><div class="act-desc">Account created</div><div class="act-time">Welcome to Orident Inc!</div></div><div class="act-amount" style="color:var(--green)">+$10,000</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- BALANCE CARD -->
+      <div class="side-card">
+        <div class="balance-display">
+          <div class="bal-label">Available Balance</div>
+          <div class="bal-amount" id="side-balance">$10,000.00</div>
+          <div class="bal-sub">No minimum deposit required</div>
+        </div>
+        <div class="quick-actions">
+          <a href="deposit.html" class="qa-btn qa-dep">💰 Deposit</a>
+          <a href="deposit.html#withdraw" class="qa-btn qa-wit">↑ Withdraw</a>
+        </div>
+      </div>
+
+      <!-- LIVE PRICES -->
+      <div class="side-card">
+        <div class="section-hd" style="margin-bottom:12px;"><h3>Live Prices</h3><a href="markets.html" style="font-size:12px;color:var(--ink);text-decoration:none;">All Markets →</a></div>
+        <div id="side-prices"></div>
+      </div>
+
+      <!-- COPY TRADING -->
+      <div class="side-card">
+        <div class="section-hd" style="margin-bottom:12px;"><h3>Top Traders</h3><a href="copy-trading.html" style="font-size:12px;color:var(--ink);text-decoration:none;">Explore →</a></div>
+        <div id="side-traders"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+if(!Auth.isLoggedIn()) window.location.href='login.html';
+const u=Auth.currentUser;
+document.getElementById('user-first').textContent=u.firstName||'Investor';
+document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+function updateKPIs(){
+  const bal=u.balance||0;
+  document.getElementById('kpi-balance').textContent='$'+fmt(bal);
+  document.getElementById('side-balance').textContent='$'+fmt(bal);
+  document.getElementById('kpi-portfolio').textContent='$'+fmt(bal);
+  document.getElementById('kpi-pnl').textContent='+$0.00';
+  document.getElementById('kpi-positions').textContent='0';
+}
+updateKPIs();
+
+// Watchlist defaults
+const defaultWatch=['AAPL','NVDA','BTC','ETH','EUR/USD','SPX','XAUUSD','MRNA'];
+function renderWatchlist(){
+  const all=[...ASSETS.stocks,...ASSETS.crypto,...ASSETS.forex,...ASSETS.indices,...ASSETS.commodities,...ASSETS.ai_biotech];
+  const items=defaultWatch.map(s=>all.find(a=>a.sym===s)).filter(Boolean);
+  document.getElementById('watchlist-items').innerHTML=items.map(a=>`
+    <div class="watch-item">
+      <div><div class="watch-sym">${a.sym}</div><div class="watch-name">${a.name}</div></div>
+      <div><div class="watch-price">${a.price>100?'$'+fmt(a.price):'$'+fmt(a.price,4)}</div><div class="watch-chg ${pctClass(a.pct)}">${fmtPct(a.pct)}</div></div>
+    </div>`).join('');
+}
+renderWatchlist();
+document.addEventListener('prices:update',renderWatchlist);
+
+// Side prices
+function renderSidePrices(){
+  const items=[{sym:'AAPL',cat:'stocks'},{sym:'BTC',cat:'crypto'},{sym:'EUR/USD',cat:'forex'},{sym:'XAUUSD',cat:'commodities'}];
+  document.getElementById('side-prices').innerHTML=items.map(i=>{
+    const a=(ASSETS[i.cat]||[]).find(x=>x.sym===i.sym)||{price:0,pct:0};
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--ink)">${i.sym}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700">${a.price>100?'$'+fmt(a.price):'$'+fmt(a.price,4)}</span>
+      <span style="font-size:12px;color:${a.pct>=0?'var(--green)':'var(--red)'}">${fmtPct(a.pct)}</span>
+    </div>`;
+  }).join('');
+}
+renderSidePrices();
+document.addEventListener('prices:update',renderSidePrices);
+
+// Side traders
+const traders=[{name:'Alex Rivera',ret:'+142.8%',col:'#1A6BFF'},{name:'Priya Shah',ret:'+98.4%',col:'#00C27A'},{name:'Chen Wei',ret:'+215.6%',col:'#F5A623'}];
+document.getElementById('side-traders').innerHTML=traders.map(t=>`
+  <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+    <div style="width:32px;height:32px;border-radius:50%;background:${t.col}20;color:${t.col};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">${t.name[0]}</div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--ink)">${t.name}</div></div>
+    <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:var(--green)">${t.ret}</span>
+  </div>`).join('');
+</script>
+</body></html>

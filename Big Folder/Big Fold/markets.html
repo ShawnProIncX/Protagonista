@@ -1,0 +1,241 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Markets — Orident Inc</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+body{background:var(--surface);}
+.markets-wrap{max-width:1300px;margin:0 auto;padding:100px 4% 60px;}
+.markets-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
+.markets-header h1{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:var(--ink);letter-spacing:-0.5px;}
+.live-badge{display:flex;align-items:center;gap:6px;background:var(--green2);color:var(--green);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+.live-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.market-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;background:white;border:1px solid var(--border);border-radius:12px;padding:8px;}
+.mnav-btn{padding:9px 18px;border-radius:8px;border:none;background:transparent;color:var(--slate);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.mnav-btn.active,.mnav-btn:hover{background:var(--surface);color:var(--ink);}
+.search-bar{display:flex;gap:10px;margin-bottom:20px;}
+.search-bar input{flex:1;padding:11px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:white;}
+.search-bar input:focus{border-color:var(--ink);}
+.market-table-wrap{background:white;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);}
+.market-table{width:100%;border-collapse:collapse;}
+.market-table th{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;padding:14px 18px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface);white-space:nowrap;}
+.market-table td{padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;}
+.market-table tr:last-child td{border-bottom:none;}
+.market-table tr:hover td{background:var(--surface);cursor:pointer;}
+.sym-cell{font-family:'DM Mono',monospace;font-weight:600;color:var(--ink);}
+.name-cell{color:var(--ink);font-weight:500;}
+.price-cell{font-family:'DM Mono',monospace;font-weight:700;color:var(--ink);}
+.sector-tag{background:var(--surface);color:var(--muted);padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;}
+.trade-btn{background:var(--surface);color:var(--ink);border:1px solid rgba(26,107,255,0.2);padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.trade-btn:hover{background:var(--blue);color:white;}
+.re-section-inner{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:8px;}
+.re-idx-card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:all .2s;cursor:pointer;}
+.re-idx-card:hover{box-shadow:var(--shadow2);transform:translateY(-2px);border-color:var(--ink);}
+.re-city-name{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.re-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.re-sqft{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.re-sqft-lbl{font-size:11px;color:var(--muted);margin-bottom:12px;}
+.re-row{display:flex;justify-content:space-between;align-items:center;}
+.modal-trade .modal-box{max-width:400px;}
+.trade-form-header{margin-bottom:20px;}
+.trade-side-btns{display:flex;gap:8px;margin-bottom:20px;}
+.side-btn{flex:1;padding:12px;border-radius:8px;border:2px solid var(--border);background:white;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.side-btn.buy.active{background:var(--green2);border-color:var(--green);color:var(--green);}
+.side-btn.sell.active{background:var(--red2);border-color:var(--red);color:var(--red);}
+.order-summary{background:var(--surface);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:13px;}
+.order-row{display:flex;justify-content:space-between;padding:4px 0;}
+.order-row span:first-child{color:var(--muted);}
+.order-row span:last-child{font-weight:600;color:var(--ink);}
+</style>
+</head><body>
+<div id="toast-container"></div>
+<nav class="orident-nav">
+  <a href="index.html" class="nav-logo"><div class="nav-logo-mark"><svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19 Q8 10 14 8 Q20 6 26 10 Q32 14 32 19 Q32 24 26 28 Q20 32 14 30 Q8 28 6 19Z" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M8 19 C8 13.5 11.5 9.5 16 9.5 C20.5 9.5 23 13 23 19 C23 25 20.5 28.5 16 28.5 C11.5 28.5 8 24.5 8 19Z" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M13.5 10 C13 9 12.5 8 11.5 7.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"/><path d="M18 9.6 C18.5 8.5 19 7.8 19.5 7" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-linecap="round"/><path d="M13 28 C12.5 29.2 12 30 11 31" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"/><path d="M27 9.5 L27 28.5" stroke="white" stroke-width="2.8" stroke-linecap="round"/><path d="M25 10 L29 10" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M24.5 9.5 C24 8.5 23.5 8 23 7.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29.5 9.5 C30 8.5 30.5 8 31 7" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M25 28.5 L29 28.5" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M25 29 C24.5 30 24 30.8 23.2 31.5" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29 29 C29.5 30 30 31 30.8 31.8" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M22 15 C24 14.5 26 14.8 27 15" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/><path d="M22 23 C24 23.2 26 23.1 27 23" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/></svg></div><span class="nav-logo-text">Orident<span>Inc</span></span></a>
+    <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="markets.html" class="active">Markets</a></li>
+    <li><a href="copy-trading.html">Copy Trading</a></li>
+    <li><a href="browse-tags.html">Browse Tags</a></li>
+  </ul>
+    <div class="nav-right">
+    <a href="login.html" class="btn-primary">Get Started →</a>
+  </div>
+</nav>
+
+<!-- TRADE MODAL -->
+<div class="modal-overlay modal-trade" id="trade-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="trade-modal-title">Trade AAPL</h3>
+      <button class="modal-close" onclick="closeTrade()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="trade-form-header">
+        <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--ink)" id="trade-price">$189.30</div>
+        <div id="trade-badge" style="margin-top:4px;"></div>
+      </div>
+      <div class="trade-side-btns">
+        <button class="side-btn buy active" id="btn-buy" onclick="setSide('buy')">▲ Buy</button>
+        <button class="side-btn sell" id="btn-sell" onclick="setSide('sell')">▼ Sell</button>
+      </div>
+      <div class="form-group"><label>Amount (USD)</label><input type="number" id="trade-amount" placeholder="100.00" min="1" oninput="updateSummary()"/></div>
+      <div class="order-summary">
+        <div class="order-row"><span>Est. Units</span><span id="est-units">—</span></div>
+        <div class="order-row"><span>Order Type</span><span>Market Order</span></div>
+        <div class="order-row"><span>Fee</span><span>$0.00</span></div>
+        <div class="order-row"><span style="font-weight:700;color:var(--ink)">Total</span><span id="est-total" style="font-weight:700;color:var(--ink)">—</span></div>
+      </div>
+      <button class="btn-primary" id="trade-confirm-btn" style="width:100%;justify-content:center;padding:14px;" onclick="confirmTrade()">Confirm Buy Order</button>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">You must be <a href="login.html" style="color:var(--ink);font-weight:700;">signed in</a> to place a live trade. <a href="login.html" style="color:var(--ink);font-weight:700;">Create account →</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="markets-wrap">
+  <div class="markets-header">
+    <div>
+      <h1>Markets</h1>
+      <p style="font-size:14px;color:var(--muted);margin-top:4px;">Live prices across all asset classes</p>
+    </div>
+    <div class="live-badge"><div class="dot"></div>LIVE · Updates every 3s</div>
+  </div>
+
+  <div class="market-nav">
+    <button class="mnav-btn active" onclick="setMarket('all',this)">🔍 All Markets</button>
+    <button class="mnav-btn" onclick="setMarket('stocks',this)">📈 Stocks & ETFs</button>
+    <button class="mnav-btn" onclick="setMarket('crypto',this)">₿ Crypto</button>
+    <button class="mnav-btn" onclick="setMarket('forex',this)">💱 Forex</button>
+    <button class="mnav-btn" onclick="setMarket('indices',this)">📊 Indices</button>
+    <button class="mnav-btn" onclick="setMarket('commodities',this)">🛢️ Commodities</button>
+    <button class="mnav-btn" onclick="setMarket('reits',this)">🏢 REITs</button>
+    <button class="mnav-btn" onclick="setMarket('realestate',this)">🏙️ Real Estate</button>
+    <button class="mnav-btn" onclick="setMarket('ai_biotech',this)">🧬 AI & Biotech</button>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search by symbol or name..." oninput="renderTable()"/>
+  </div>
+
+  <div id="table-container"></div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let curMarket='all';
+let tradeSym='',tradePrice=0,tradeSide='buy';
+
+function setMarket(m,btn){
+  curMarket=m;
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('search-input').value='';
+  renderTable();
+}
+
+function getAllAssets(){
+  var all=[];
+  Object.keys(ASSETS).forEach(function(type){
+    ASSETS[type].forEach(function(a){ all.push(Object.assign({},a,{_type:type})); });
+  });
+  return all;
+}
+
+
+function renderTable(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const container=document.getElementById('table-container');
+  if(curMarket==='realestate'){renderRETable(q,container);return;}
+  var src = curMarket==='all' ? getAllAssets() : (ASSETS[curMarket]||[]);
+  var arr = src.filter(function(a){
+    if(!q) return true;
+    return (a.sym||a.city||'').toLowerCase().includes(q)||
+           (a.name||'').toLowerCase().includes(q)||
+           (a.sector||'').toLowerCase().includes(q)||
+           (a._type||'').toLowerCase().includes(q);
+  });
+  var total=arr.length;
+  var rows=arr.map(function(a){
+    var sym=a.sym||a.city||'';
+    var nm=a.name||(a.city||'')+(a.state?', '+a.state:'');
+    var price=a.price>100?'$'+fmt(a.price):'$'+fmt(a.price,4);
+    var chg=a.chg||0;
+    var chgColor=chg>=0?'var(--green)':'var(--red)';
+    var chgStr=(chg>=0?'+':'')+fmt(chg,a.price>10?2:4);
+    var sect=a.sector||a.type||a._type||curMarket;
+    var safeSym=sym.replace(/'/g,"\\'");
+    return '<tr onclick="openTrade(''+safeSym+'','+a.price+','+a.pct+')">'
+      +'<td class="sym-cell"><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+getAssetIcon(a.sym)+'</div><strong>'+sym+'</strong></div></td>'
+      +'<td class="name-cell">'+nm+'</td>'
+      +'<td class="price-cell">'+price+'</td>'
+      +'<td style="font-family:'DM Mono',monospace;color:'+chgColor+'">'+chgStr+'</td>'
+      +'<td>'+pctBadge(a.pct)+'</td>'
+      +'<td><span class="sector-tag">'+sect+'</span></td>'
+      +'<td><button class="trade-btn" onclick="event.stopPropagation();openTrade(''+safeSym+'','+a.price+','+a.pct+')">Trade</button></td>'
+      +'</tr>';
+  }).join('');
+  container.innerHTML='<div class="market-table-wrap">'
+    +'<div style="padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);font-weight:600;">'+total.toLocaleString()+' asset'+(total!==1?'s':'')+' available</div>'
+    +'<table class="market-table"><thead><tr><th>Asset</th><th>Name</th><th>Price</th><th>Change</th><th>% Change</th><th>Type/Sector</th><th>Trade</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div>';
+}
+
+function renderRETable(q,container){
+  const arr=ASSETS.realestate.filter(r=>r.city.toLowerCase().includes(q)||r.state.toLowerCase().includes(q));
+  container.innerHTML=`<div class="re-section-inner">${arr.map(r=>`<div class="re-idx-card" onclick="openTrade('${r.city.replace(/ /g,'_')}',${r.price},${r.pct})">
+    <div class="re-city-name">${r.city}</div>
+    <div class="re-sub">${r.state} · Real Estate Price Index</div>
+    <div class="re-sqft">$${fmt(r.price)}</div>
+    <div class="re-sqft-lbl">Price per sq ft</div>
+    <div class="re-row">${pctBadge(r.pct)}<span style="font-size:12px;color:var(--muted)">Vol ${r.vol}</span></div>
+    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:14px;text-decoration:none;display:block;text-align:center;padding:10px;">Trade Index</button>
+  </div>`).join('')}</div>`;
+}
+
+renderTable();
+document.addEventListener('prices:update',()=>{if(document.getElementById('table-container'))renderTable();});
+
+function openTrade(sym,price,pct){
+  tradeSym=sym;tradePrice=price;tradeSide='buy';
+  document.getElementById('trade-modal-title').textContent='Trade '+sym;
+  document.getElementById('trade-price').textContent='$'+fmt(price,price>100?2:4);
+  document.getElementById('trade-badge').innerHTML=pctBadge(pct);
+  document.getElementById('trade-amount').value='';
+  document.getElementById('est-units').textContent='—';
+  document.getElementById('est-total').textContent='—';
+  document.getElementById('btn-buy').className='side-btn buy active';
+  document.getElementById('btn-sell').className='side-btn sell';
+  document.getElementById('trade-confirm-btn').textContent='Confirm Buy Order';
+  document.getElementById('trade-confirm-btn').style.background='var(--blue)';
+  document.getElementById('trade-modal').classList.add('open');
+}
+function closeTrade(){document.getElementById('trade-modal').classList.remove('open');}
+function setSide(side){
+  tradeSide=side;
+  document.getElementById('btn-buy').className='side-btn buy'+(side==='buy'?' active':'');
+  document.getElementById('btn-sell').className='side-btn sell'+(side==='sell'?' active':'');
+  const btn=document.getElementById('trade-confirm-btn');
+  btn.textContent=side==='buy'?'Confirm Buy Order':'Confirm Sell Order';
+  btn.style.background=side==='buy'?'var(--blue)':'var(--red)';
+  updateSummary();
+}
+function updateSummary(){
+  const amt=parseFloat(document.getElementById('trade-amount').value)||0;
+  if(!amt||!tradePrice){document.getElementById('est-units').textContent='—';document.getElementById('est-total').textContent='—';return;}
+  const units=(amt/tradePrice).toFixed(6);
+  document.getElementById('est-units').textContent=units;
+  document.getElementById('est-total').textContent='$'+fmt(amt);
+}
+function confirmTrade(){
+  if(!Auth.isLoggedIn()){showToast('Please sign in to trade','error','🔒');setTimeout(()=>window.location.href='login.html',1500);return;}
+  const amt=parseFloat(document.getElementById('trade-amount').value)||0;
+  if(!amt||amt<1){showToast('Enter an amount to trade','error','⚠️');return;}
+  const u=Auth.currentUser;
+  if(tradeSide==='buy'&&amt>u.balance){showToast('Insufficient balance. Please deposit funds.','error','💰');return;}
+  if(tradeSide==='buy') Auth.updateUser({balance:u.balance-amt});
+  closeTrade();
+  showToast(`${tradeSide==='buy'?'Bought':'Sold'} $${fmt(amt)} of ${tradeSym}`,'success','✅');
+}
+document.getElementById('trade-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeTrade();});
+</script>
+</body></html>

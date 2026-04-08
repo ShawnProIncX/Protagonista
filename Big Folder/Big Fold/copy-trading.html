@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Copy Trading — Orident Inc</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+body{background:var(--surface);}
+.ct-wrap{max-width:1300px;margin:0 auto;padding:88px 4% 60px;}
+.ct-header{background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:20px;padding:48px;margin-bottom:32px;position:relative;overflow:hidden;}
+.ct-header::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(26,107,255,.25) 0%,transparent 70%);}
+.ct-header h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;color:white;margin-bottom:10px;letter-spacing:-1px;}
+.ct-header p{font-size:16px;color:rgba(255,255,255,.6);max-width:500px;}
+.ct-stats{display:flex;gap:32px;margin-top:24px;flex-wrap:wrap;}
+.ct-stat{border-right:1px solid rgba(255,255,255,.12);padding-right:32px;}
+.ct-stat:last-child{border-right:none;}
+.ct-stat-v{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--blue2);}
+.ct-stat-l{font-size:12px;color:rgba(255,255,255,.45);margin-top:3px;}
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:24px;}
+.filter-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.filter-btn{padding:7px 15px;border-radius:20px;border:1.5px solid var(--border);background:white;color:var(--slate);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.filter-btn.active,.filter-btn:hover{background:var(--blue);color:white;border-color:var(--ink);}
+.traders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;}
+.trader-full-card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:26px;transition:all .2s;}
+.trader-full-card:hover{box-shadow:var(--shadow2);transform:translateY(-3px);}
+.tfc-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.tfc-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;font-family:'Sora',sans-serif;flex-shrink:0;}
+.tfc-name{font-family:'Sora',sans-serif;font-weight:700;color:var(--ink);font-size:16px;}
+.tfc-handle{font-size:12px;color:var(--muted);}
+.tfc-rank{margin-left:auto;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+.rank-1{background:var(--gold2);color:var(--gold);}
+.rank-2{background:var(--surface);color:var(--slate);}
+.rank-3{background:#FFF0E8;color:#CD7F32;}
+.rank-other{background:var(--surface);color:var(--muted);}
+.tfc-bio{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;}
+.tfc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.tfc-s{background:var(--surface);border-radius:8px;padding:12px;text-align:center;}
+.tfc-sl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px;}
+.tfc-sv{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:var(--ink);}
+.tfc-sv.up{color:var(--green);}
+.tfc-sectors{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.copy-modal .modal-box{max-width:440px;}
+.copy-alloc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.alloc-preset{padding:10px;border:2px solid var(--border);border-radius:8px;background:white;text-align:center;cursor:pointer;transition:all .2s;}
+.alloc-preset.active,.alloc-preset:hover{border-color:var(--ink);background:var(--surface);}
+.alloc-preset .pct{font-size:16px;font-weight:800;color:var(--ink);}
+.alloc-preset .amt{font-size:11px;color:var(--muted);}
+.leaderboard-table{width:100%;border-collapse:collapse;}
+.leaderboard-table th{font-size:11px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;padding:12px 16px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface);}
+.leaderboard-table td{padding:13px 16px;border-bottom:1px solid var(--border);font-size:14px;}
+</style>
+</head><body>
+<div id="toast-container"></div>
+<nav class="orident-nav">
+  <a href="index.html" class="nav-logo"><div class="nav-logo-mark"><svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19 Q8 10 14 8 Q20 6 26 10 Q32 14 32 19 Q32 24 26 28 Q20 32 14 30 Q8 28 6 19Z" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M8 19 C8 13.5 11.5 9.5 16 9.5 C20.5 9.5 23 13 23 19 C23 25 20.5 28.5 16 28.5 C11.5 28.5 8 24.5 8 19Z" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M13.5 10 C13 9 12.5 8 11.5 7.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"/><path d="M18 9.6 C18.5 8.5 19 7.8 19.5 7" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-linecap="round"/><path d="M13 28 C12.5 29.2 12 30 11 31" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"/><path d="M27 9.5 L27 28.5" stroke="white" stroke-width="2.8" stroke-linecap="round"/><path d="M25 10 L29 10" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M24.5 9.5 C24 8.5 23.5 8 23 7.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29.5 9.5 C30 8.5 30.5 8 31 7" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M25 28.5 L29 28.5" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M25 29 C24.5 30 24 30.8 23.2 31.5" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29 29 C29.5 30 30 31 30.8 31.8" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M22 15 C24 14.5 26 14.8 27 15" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/><path d="M22 23 C24 23.2 26 23.1 27 23" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/></svg></div><span class="nav-logo-text">Orident<span>Inc</span></span></a>
+    <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="markets.html">Markets</a></li>
+    <li><a href="copy-trading.html" class="active">Copy Trading</a></li>
+    <li><a href="browse-tags.html">Browse Tags</a></li>
+  </ul>
+    <div class="nav-right">
+    <a href="login.html" class="btn-primary">Get Started →</a>
+  </div>
+</nav>
+
+<!-- COPY MODAL -->
+<div class="modal-overlay copy-modal" id="copy-modal">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="copy-modal-title">Copy Trader</h3><button class="modal-close" onclick="closeCopy()">✕</button></div>
+    <div class="modal-body">
+      <div id="copy-trader-preview" style="margin-bottom:20px;"></div>
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">Allocate Amount</h4>
+      <div class="copy-alloc-grid" id="alloc-grid"></div>
+      <div class="form-group"><label>Or enter custom amount ($)</label><input type="number" id="copy-amount" placeholder="Custom amount..." oninput="updateCopyEst()"/></div>
+      <div class="summary-box" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="font-size:13px;color:var(--muted)">Your Allocation</span><span id="copy-alloc-display" style="font-weight:700;font-size:13px;">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="font-size:13px;color:var(--muted)">Commission Share</span><span style="font-weight:700;font-size:13px;">10% of profit</span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="font-size:13px;color:var(--muted)">Auto-copy Trades</span><span style="font-weight:700;font-size:13px;color:var(--green)">Enabled</span></div>
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center;padding:14px;" onclick="confirmCopy()">Start Copying →</button>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">You must be <a href="login.html" style="color:var(--ink);font-weight:700;">signed in</a> to copy this trader. <a href="login.html" style="color:var(--ink);font-weight:700;">Create account →</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="ct-wrap">
+  <div class="ct-header">
+    <h1>Copy Trading</h1>
+    <p>Follow the world's top traders. Auto-copy every trade they make and earn proportional returns.</p>
+    <div class="ct-stats">
+      <div class="ct-stat"><div class="ct-stat-v">2,400+</div><div class="ct-stat-l">Active Traders</div></div>
+      <div class="ct-stat"><div class="ct-stat-v">$48M+</div><div class="ct-stat-l">Copy Volume</div></div>
+      <div class="ct-stat"><div class="ct-stat-v">+215%</div><div class="ct-stat-l">Top Trader Return</div></div>
+      <div class="ct-stat"><div class="ct-stat-v">10%</div><div class="ct-stat-l">Commission on Profit</div></div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="card" style="margin-bottom:28px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <h3 style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;">🏆 Leaderboard</h3>
+      <span class="badge badge-up">Updated Live</span>
+    </div>
+    <div style="overflow:auto;">
+      <table class="leaderboard-table" id="leaderboard-table">
+        <thead><tr><th>#</th><th>Trader</th><th>Return (30d)</th><th>Win Rate</th><th>Followers</th><th>Risk</th><th>Assets</th><th></th></tr></thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filters">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" onclick="filterTraders('all',this)">All</button>
+    <button class="filter-btn" onclick="filterTraders('low',this)">Low Risk</button>
+    <button class="filter-btn" onclick="filterTraders('medium',this)">Medium Risk</button>
+    <button class="filter-btn" onclick="filterTraders('high',this)">High Risk</button>
+  </div>
+
+  <div class="traders-grid" id="traders-grid"></div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const TRADERS=[
+  {id:1,name:'Chen Wei',handle:'@cwei_fx',bio:'Former Goldman Sachs quant trader. Specializes in Forex and Indices. 12 years experience.',ret:'+215.6%',win:'82%',fol:'22.1K',risk:'High',col:'#F5A623',sectors:['Forex','Indices','Commodities'],monthly:'+18.2%',drawn:'-8.4%',trades:248},
+  {id:2,name:'Alex Rivera',handle:'@arivera',bio:'Tech sector specialist. Early investor in NVDA, META, PLTR. Consistently top 5 performer.',ret:'+142.8%',win:'78%',fol:'12.4K',risk:'Medium',col:'#1A6BFF',sectors:['Stocks','AI & Biotech'],monthly:'+11.9%',drawn:'-5.2%',trades:182},
+  {id:3,name:'Priya Shah',handle:'@priyatrades',bio:'Conservative long-term investor. Focus on dividend stocks and REITs. Minimal drawdown.',ret:'+98.4%',win:'71%',fol:'8.9K',risk:'Low',col:'#00C27A',sectors:['Stocks','REITs','ETFs'],monthly:'+8.2%',drawn:'-2.8%',trades:94},
+  {id:4,name:'James Okon',handle:'@jokon',bio:'Crypto and DeFi specialist. Identified SOL at $12. Risk-managed positions only.',ret:'+87.2%',win:'69%',fol:'6.2K',risk:'Low',col:'#7C3AED',sectors:['Crypto','AI'],monthly:'+7.3%',drawn:'-3.1%',trades:138},
+  {id:5,name:'Sofia Martins',handle:'@sofiatrades',bio:'Options & derivatives expert. Generates income through covered calls and spreads.',ret:'+124.5%',win:'74%',fol:'10.2K',risk:'Medium',col:'#0891B2',sectors:['Options','Stocks'],monthly:'+10.4%',drawn:'-4.7%',trades:320},
+  {id:6,name:'David Park',handle:'@dpark_re',bio:'Real estate & REIT focus. Tracking urban migration trends to property indices.',ret:'+62.8%',win:'66%',fol:'4.8K',risk:'Low',col:'#059669',sectors:['REITs','Real Estate'],monthly:'+5.2%',drawn:'-1.9%',trades:72},
+];
+
+let curFilter='all';
+let copyTrader=null;
+
+function filterTraders(f,btn){
+  curFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTraders();
+}
+
+function renderTraders(){
+  const filtered=curFilter==='all'?TRADERS:TRADERS.filter(t=>t.risk.toLowerCase()===curFilter);
+  document.getElementById('traders-grid').innerHTML=filtered.map((t,i)=>`
+    <div class="trader-full-card">
+      <div class="tfc-head">
+        <div class="tfc-av" style="background:${t.col}20;color:${t.col}">${t.name[0]}</div>
+        <div><div class="tfc-name">${t.name}</div><div class="tfc-handle">${t.handle}</div></div>
+        <div class="tfc-rank rank-${i<3?i+1:'other'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div>
+      </div>
+      <p class="tfc-bio">${t.bio}</p>
+      <div class="tfc-stats">
+        <div class="tfc-s"><div class="tfc-sl">30d Return</div><div class="tfc-sv up">${t.ret}</div></div>
+        <div class="tfc-s"><div class="tfc-sl">Win Rate</div><div class="tfc-sv">${t.win}</div></div>
+        <div class="tfc-s"><div class="tfc-sl">Followers</div><div class="tfc-sv">${t.fol}</div></div>
+        <div class="tfc-s"><div class="tfc-sl">Monthly</div><div class="tfc-sv up">${t.monthly}</div></div>
+        <div class="tfc-s"><div class="tfc-sl">Max Drawdown</div><div class="tfc-sv" style="color:var(--red)">${t.drawn}</div></div>
+        <div class="tfc-s"><div class="tfc-sl">Total Trades</div><div class="tfc-sv">${t.trades}</div></div>
+      </div>
+      <div class="tfc-sectors">${t.sectors.map(s=>`<span class="badge badge-blue">${s}</span>`).join('')}<span class="badge badge-${t.risk==='Low'?'up':t.risk==='High'?'down':'blue'}">${t.risk} Risk</span></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" style="flex:1;justify-content:center;padding:12px;" onclick="openCopy(${t.id})">Copy Trader</button>
+        <button class="btn-ghost" style="padding:12px 16px;" title="Follow">♡</button>
+      </div>
+    </div>`).join('');
+}
+renderTraders();
+
+document.getElementById('leaderboard-body').innerHTML=TRADERS.map((t,i)=>`
+  <tr>
+    <td style="font-weight:800;color:${i===0?'var(--gold)':i===1?'var(--slate)':i===2?'#CD7F32':'var(--muted)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+    <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:32px;height:32px;border-radius:50%;background:${t.col}20;color:${t.col};display:flex;align-items:center;justify-content:center;font-weight:700">${t.name[0]}</div><div><div style="font-weight:600">${t.name}</div><div style="font-size:11px;color:var(--muted)">${t.handle}</div></div></div></td>
+    <td><span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--green)">${t.ret}</span></td>
+    <td>${t.win}</td>
+    <td>${t.fol}</td>
+    <td><span class="badge badge-${t.risk==='Low'?'up':t.risk==='High'?'down':'blue'}">${t.risk}</span></td>
+    <td>${t.sectors.slice(0,2).join(', ')}</td>
+    <td><button class="trade-btn" onclick="openCopy(${t.id})" style="background:var(--surface);color:var(--ink);border:1px solid rgba(26,107,255,.2);padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Copy</button></td>
+  </tr>`).join('');
+
+function openCopy(id){
+  copyTrader=TRADERS.find(t=>t.id===id);
+  if(!copyTrader)return;
+  document.getElementById('copy-modal-title').textContent='Copy '+copyTrader.name;
+  document.getElementById('copy-trader-preview').innerHTML=`<div style="display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:10px;padding:14px;"><div style="width:40px;height:40px;border-radius:50%;background:${copyTrader.col}20;color:${copyTrader.col};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;">${copyTrader.name[0]}</div><div><div style="font-weight:700">${copyTrader.name}</div><div style="font-size:12px;color:var(--muted)">${copyTrader.handle} · ${copyTrader.ret} return · ${copyTrader.win} win rate</div></div></div>`;
+  const balance=Auth.isLoggedIn()?(Auth.currentUser.balance||0):10000;
+  const presets=[0.1,0.25,0.5];
+  document.getElementById('alloc-grid').innerHTML=presets.map(p=>`<div class="alloc-preset" onclick="setAlloc(${p},this,${balance})"><div class="pct">${p*100}%</div><div class="amt">$${fmt(balance*p)}</div></div>`).join('');
+  document.getElementById('copy-amount').value='';
+  document.getElementById('copy-alloc-display').textContent='$0.00';
+  document.getElementById('copy-modal').classList.add('open');
+}
+function closeCopy(){document.getElementById('copy-modal').classList.remove('open');}
+function setAlloc(pct,el,bal){
+  document.querySelectorAll('.alloc-preset').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  const amt=bal*pct;
+  document.getElementById('copy-amount').value=fmt(amt,2);
+  document.getElementById('copy-alloc-display').textContent='$'+fmt(amt);
+}
+function updateCopyEst(){const v=parseFloat(document.getElementById('copy-amount').value)||0;document.getElementById('copy-alloc-display').textContent='$'+fmt(v);}
+function confirmCopy(){
+  if(!Auth.isLoggedIn()){showToast('Please sign in to copy traders','error','🔒');setTimeout(()=>window.location.href='login.html',1200);return;}
+  const amt=parseFloat(document.getElementById('copy-amount').value)||0;
+  if(amt<10){showToast('Minimum copy allocation is $10','error','⚠️');return;}
+  closeCopy();
+  showToast('Now copying '+copyTrader.name+'! Trades will be auto-mirrored 🚀','success','✅');
+}
+document.getElementById('copy-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCopy();});
+</script>
+</body></html>

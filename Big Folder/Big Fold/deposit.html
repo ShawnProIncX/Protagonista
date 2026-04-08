@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Deposit & Withdraw — Orident Inc</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+.page-wrap{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 68px);margin-top:68px;}
+.sidebar{background:var(--ink);padding:24px 16px;position:sticky;top:68px;height:calc(100vh - 68px);overflow-y:auto;}
+.sb-section{margin-bottom:28px;}
+.sb-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.3);text-transform:uppercase;padding:0 12px;margin-bottom:8px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;transition:all .2s;cursor:pointer;}
+.sb-item:hover,.sb-item.active{background:rgba(255,255,255,.08);color:white;}
+.sb-item .si-icon{font-size:16px;width:20px;text-align:center;}
+.main-area{padding:32px;background:var(--surface);}
+.page-title{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.page-sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
+.dep-tabs{display:flex;gap:4px;background:white;border:1px solid var(--border);border-radius:10px;padding:5px;margin-bottom:28px;width:fit-content;}
+.dep-tab{padding:9px 24px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;border-radius:7px;transition:all .2s;}
+.dep-tab.active{background:var(--blue);color:white;}
+.dep-panel{display:none;}
+.dep-panel.active{display:block;}
+.method-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;}
+.method-card{border:2px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;background:white;position:relative;}
+.method-card:hover{border-color:var(--ink);box-shadow:var(--shadow);}
+.method-card.selected{border-color:var(--ink);background:var(--surface);}
+.method-card .mc-icon{font-size:28px;margin-bottom:10px;}
+.method-card .mc-name{font-weight:700;font-size:14px;color:var(--ink);margin-bottom:3px;}
+.method-card .mc-sub{font-size:12px;color:var(--muted);}
+.method-card .mc-badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.method-details{background:white;border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;}
+.method-details h3{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--surface);gap:16px;}
+.detail-row:last-child{border-bottom:none;}
+.dr-label{font-size:12px;color:var(--muted);font-weight:600;}
+.dr-val{font-size:13px;font-weight:700;color:var(--ink);text-align:right;word-break:break-all;font-family:'DM Mono',monospace;}
+.copy-btn{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--ink);transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.copy-btn:hover{background:var(--surface);}
+.amount-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.amt-preset{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;color:var(--ink);}
+.amt-preset:hover,.amt-preset.selected{border-color:var(--ink);background:var(--surface);color:var(--ink);}
+.proof-box{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface);}
+.proof-box:hover{border-color:var(--ink);background:var(--surface);}
+.proof-box input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.risk-disclaimer{background:var(--red2);border:1px solid rgba(240,58,71,.2);border-radius:10px;padding:16px;font-size:13px;line-height:1.7;color:var(--red);margin-bottom:16px;}
+.privacy-notice{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;}
+.privacy-notice a{color:var(--ink);}
+.tx-table{width:100%;border-collapse:collapse;}
+.tx-table th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);}
+.tx-table td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--surface);vertical-align:middle;}
+@media(max-width:900px){.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+<nav class="orident-nav">
+  <a href="index.html" class="nav-logo"><div class="nav-logo-mark"><svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19 Q8 10 14 8 Q20 6 26 10 Q32 14 32 19 Q32 24 26 28 Q20 32 14 30 Q8 28 6 19Z" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M8 19 C8 13.5 11.5 9.5 16 9.5 C20.5 9.5 23 13 23 19 C23 25 20.5 28.5 16 28.5 C11.5 28.5 8 24.5 8 19Z" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M13.5 10 C13 9 12.5 8 11.5 7.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"/><path d="M18 9.6 C18.5 8.5 19 7.8 19.5 7" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-linecap="round"/><path d="M13 28 C12.5 29.2 12 30 11 31" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"/><path d="M27 9.5 L27 28.5" stroke="white" stroke-width="2.8" stroke-linecap="round"/><path d="M25 10 L29 10" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M24.5 9.5 C24 8.5 23.5 8 23 7.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29.5 9.5 C30 8.5 30.5 8 31 7" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M25 28.5 L29 28.5" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" stroke-linecap="round"/><path d="M25 29 C24.5 30 24 30.8 23.2 31.5" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M29 29 C29.5 30 30 31 30.8 31.8" stroke="rgba(255,255,255,0.35)" stroke-width="0.9" stroke-linecap="round"/><path d="M22 15 C24 14.5 26 14.8 27 15" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/><path d="M22 23 C24 23.2 26 23.1 27 23" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-linecap="round"/></svg></div><span class="nav-logo-text">Orident<span>Inc</span></span></a>
+    <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="markets.html">Markets</a></li>
+    <li><a href="copy-trading.html">Copy Trading</a></li>
+    <li><a href="browse-tags.html">Browse Tags</a></li>
+  </ul>
+    <div class="nav-right">
+    <a href="login.html" class="btn-primary">Get Started →</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <aside class="sidebar">
+    <div style="padding:12px;margin-bottom:20px;">
+      <a href="index.html" class="nav-logo"><div class="nav-logo-mark" style="width:32px;height:32px;font-size:12px;">OI</div><span class="nav-logo-text" style="color:white;">Orident<span>Inc</span></span></a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <a href="dashboard.html" class="sb-item"><span class="si-icon">📊</span>Dashboard</a>
+      <a href="deposit.html" class="sb-item active"><span class="si-icon">💳</span>Deposit / Withdraw</a>
+      <a href="markets.html" class="sb-item"><span class="si-icon">📈</span>Markets</a>
+      <a href="copy-trading.html" class="sb-item"><span class="si-icon">👥</span>Copy Trading</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Support</div>
+      <a href="index.html#faq" class="sb-item"><span class="si-icon">❓</span>FAQ</a>
+      <a href="index.html#contact" class="sb-item"><span class="si-icon">📧</span>Contact Support</a>
+      <div class="sb-item" style="flex-direction:column;align-items:flex-start;gap:4px;cursor:default;">
+        <span style="font-size:11px;color:rgba(255,255,255,.5);">🕐 Business Hours</span>
+        <span style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.5;">Mon–Fri · 9AM–6PM EST<br/><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0d627f646968637964636e4d7d7f62796263236068">[email&#160;protected]</a></span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <div class="page-title">Deposit & Withdraw</div>
+    <p class="page-sub">Fund your account or withdraw your earnings. All transactions are secured with 256-bit SSL encryption.</p>
+
+    <!-- BALANCE CARD -->
+    <div style="background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:14px;padding:24px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Available Balance</div>
+        <div style="font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;color:white;" id="bal-display">$0.00</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px;" id="bal-equity">Portfolio Value: $0.00</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-white" onclick="switchDep('deposit')" style="padding:11px 22px;font-size:14px;">+ Deposit</button>
+        <button style="padding:11px 22px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:white;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;" onclick="switchDep('withdraw')">Withdraw →</button>
+      </div>
+    </div>
+
+    <div class="dep-tabs">
+      <button class="dep-tab active" id="tab-deposit" onclick="switchDep('deposit')">💳 Deposit</button>
+      <button class="dep-tab" id="tab-withdraw" onclick="switchDep('withdraw')">🏦 Withdraw</button>
+      <button class="dep-tab" id="tab-history" onclick="switchDep('history')">📋 History</button>
+    </div>
+
+    <!-- MINIMUM DEPOSIT BANNER — always visible -->
+    <div id="min-deposit-banner" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span style="font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:1px;">Minimum Deposit — $500 USD</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;" id="min-dep-equiv">
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">USD $</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--ink);">$500.00</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">EUR €</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#003087;" id="min-eur">€461.00</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">GBP £</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#CF142B;" id="min-gbp">£394.00</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">JPY ¥</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#BC002D;" id="min-jpy">¥77,150</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">AED د.إ</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#009736;" id="min-aed">د.إ1,836</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">SGD S$</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#EF3340;" id="min-sgd">S$671</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">BTC ₿</div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:#F7931A;" id="min-btc">₿0.0073</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">ETH Ξ</div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:#627EEA;" id="min-eth">Ξ0.1302</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">USDT ₮</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#26A17B;" id="min-usdt">₮500.00</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">CAD C$</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#FF0000;" id="min-cad">C$682</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">AUD A$</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#00008B;" id="min-aud">A$764</div>
+        </div>
+        <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">INR ₹</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:#FF9933;" id="min-inr">₹41,650</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;text-align:center;">Approximate exchange rates · Values update with live market prices · Actual amount may vary slightly at time of processing</div>
+    </div>
+    <div class="dep-panel active" id="dep-deposit">
+      <h3 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px;">Select Deposit Method</h3>
+      <div class="method-grid" id="deposit-method-grid">
+        <!-- Rendered by JS from localStorage/admin settings -->
+      </div>
+
+      <!-- Method Details (shown after selection) -->
+      <div id="method-details-wrap" style="display:none;">
+        <div class="method-details" id="method-details-content"></div>
+
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:10px;">Amount (USD) — Minimum $500</label>
+          <div class="amount-presets" id="amount-presets">
+            <button class="amt-preset" onclick="setAmt(500,this)">$500</button>
+            <button class="amt-preset" onclick="setAmt(1000,this)">$1,000</button>
+            <button class="amt-preset" onclick="setAmt(2500,this)">$2,500</button>
+            <button class="amt-preset" onclick="setAmt(5000,this)">$5,000</button>
+          </div>
+          <div class="form-group">
+            <input type="number" id="dep-amount" placeholder="Minimum $500" min="500" style="font-size:15px;" oninput="updateCurrencyEquiv()"/>
+          </div>
+          <!-- Currency Equivalents -->
+          <div id="currency-equiv" style="display:none;background:#f5f5f5;border-radius:10px;padding:14px;margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Equivalent in Other Currencies</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #eee;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">EUR €</div>
+                <div style="font-weight:700;font-size:14px;color:#003087;" id="equiv-eur">€0.00</div>
+              </div>
+              <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #eee;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">GBP £</div>
+                <div style="font-weight:700;font-size:14px;color:#CF142B;" id="equiv-gbp">£0.00</div>
+              </div>
+              <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #eee;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">JPY ¥</div>
+                <div style="font-weight:700;font-size:14px;color:#BC002D;" id="equiv-jpy">¥0</div>
+              </div>
+              <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #eee;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">BTC ₿</div>
+                <div style="font-weight:700;font-size:13px;color:#F7931A;" id="equiv-btc">₿0.000000</div>
+              </div>
+              <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #eee;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">ETH Ξ</div>
+                <div style="font-weight:700;font-size:13px;color:#627EEA;" id="equiv-eth">Ξ0.0000</div>
+              </div>
+              <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #eee;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">USDT ₮</div>
+                <div style="font-weight:700;font-size:14px;color:#26A17B;" id="equiv-usdt">₮0.00</div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:#aaa;margin-top:8px;text-align:center;">Approximate rates · Actual conversion may vary</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Upload Payment Proof <span style="font-weight:400;color:var(--muted)">(screenshot or receipt)</span></label>
+          <div class="proof-box" onclick="document.getElementById('proof-file').click()">
+            <input type="file" id="proof-file" accept="image/*,.pdf" onchange="proofSelected(this)"/>
+            <div style="font-size:24px;margin-bottom:6px;">📎</div>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);">Upload Payment Receipt / Screenshot</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">JPG, PNG, PDF · Max 10MB</div>
+            <div style="font-size:12px;color:var(--green);font-weight:600;margin-top:6px;" id="proof-status"></div>
+          </div>
+        </div>
+
+        <div class="risk-disclaimer">
+          ⚠️ <strong>Trading Risk Notice:</strong> I understand that trading forex, stocks, or crypto involves risk and that past performance does not guarantee future returns. Depositing funds acknowledges acceptance of our full <a href="index.html" style="color:var(--red)">Risk Disclosure</a>.
+        </div>
+        <div class="privacy-notice">
+          🔒 Your payment information is encrypted and never stored on our servers. Transaction records are maintained solely for regulatory compliance. <a href="index.html">Privacy Policy</a>
+        </div>
+
+        <button class="btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="submitDeposit()">Submit Deposit Request →</button>
+      </div>
+    </div>
+
+    <!-- WITHDRAW PANEL -->
+    <div class="dep-panel" id="dep-withdraw">
+      <div class="method-details" style="margin-bottom:0;">
+        <h3>Withdrawal Request</h3>
+        <div class="form-group"><label>Withdrawal Amount (USD) *</label><input type="number" id="wd-amount" placeholder="Enter amount to withdraw" min="500"/></div>
+        <div class="form-group"><label>Withdrawal Method *</label>
+          <select id="wd-method">
+            <option value="">Select method</option>
+            <option>Bank Transfer (ACH / Wire)</option>
+            <option>Credit / Debit Card</option>
+            <option>USDT (TRC-20)</option>
+            <option>Bitcoin (BTC)</option>
+            <option>PayPal</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Account / Wallet Address *</label><input type="text" id="wd-address" placeholder="Bank account, wallet address, or PayPal email"/></div>
+        <div class="form-group"><label>Additional Notes</label><textarea id="wd-notes" placeholder="Any special instructions for your withdrawal..." style="min-height:70px;"></textarea></div>
+        <div class="risk-disclaimer">
+          ⚠️ <strong>Important:</strong> Withdrawals are processed within 1–3 business days. Ensure your withdrawal address or account details are correct — transactions cannot be reversed once submitted. Crypto withdrawals are typically processed within 1–2 hours.
+        </div>
+        <div class="privacy-notice">🔒 Withdrawal information is encrypted and processed securely. We will never request your private keys or passwords. <a href="index.html">Privacy Policy</a></div>
+        <button class="btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="submitWithdrawal()">Submit Withdrawal Request →</button>
+      </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div class="dep-panel" id="dep-history">
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <h3 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);">Transaction History</h3>
+          <span style="font-size:12px;color:var(--muted);" id="tx-count">0 transactions</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="tx-table">
+            <thead><tr><th>Date</th><th>Type</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody id="tx-body"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;">No transactions yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="shared.js">
+// Init minimum deposit banner and hook into live prices
+updateMinDepBanner();
+document.addEventListener('prices:update', updateMinDepBanner);
+</script>
+<script>
+// ── DEFAULT PAYMENT METHODS (overrideable from admin) ─────────
+const DEFAULT_METHODS = [
+  {
+    id:'bank', icon:'🏦', name:'Bank Transfer', sub:'ACH / SWIFT Wire',
+    badge:'No Fee', badgeColor:'var(--green)',
+    fields:[
+      {label:'Bank Name', val:'Chase Bank, N.A.'},
+      {label:'Account Name', val:'Orident Inc LLC'},
+      {label:'Account Number', val:'****4892'},
+      {label:'Routing Number (ACH)', val:'021000021'},
+      {label:'SWIFT Code', val:'CHASUS33'},
+      {label:'Reference', val:'Use your registered email as reference'},
+    ],
+    note:'Bank transfers take 1–3 business days to reflect in your account.'
+  },
+  {
+    id:'card', icon:'💳', name:'Card Payment', sub:'Visa / Mastercard / Amex',
+    badge:'Instant', badgeColor:'var(--blue)',
+    fields:[
+      {label:'Accepted Cards', val:'Visa, Mastercard, American Express'},
+      {label:'Processing Fee', val:'2.5% (charged by payment processor)'},
+      {label:'Min Deposit', val:'$50'},
+      {label:'Max per Transaction', val:'$10,000'},
+    ],
+    note:'Card deposits are credited instantly to your Orident account.'
+  },
+  {
+    id:'usdt', icon:'💠', name:'USDT (TRC-20)', sub:'Tether Stablecoin',
+    badge:'Fast', badgeColor:'var(--green)',
+    fields:[
+      {label:'Network', val:'TRON (TRC-20)'},
+      {label:'Wallet Address', val:'TQn9Y2khEsLJW1ChVWFMSMeRDow5LQMA7J'},
+      {label:'Minimum', val:'$50 USDT'},
+      {label:'Confirmations Required', val:'12 confirmations'},
+    ],
+    note:'USDT deposits are credited after 12 network confirmations (~3 minutes).'
+  },
+  {
+    id:'btc', icon:'₿', name:'Bitcoin (BTC)', sub:'Cryptocurrency',
+    badge:'No Fee', badgeColor:'var(--gold)',
+    fields:[
+      {label:'Network', val:'Bitcoin (BTC) — Native SegWit'},
+      {label:'Wallet Address', val:'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'},
+      {label:'Minimum', val:'$100 USD equivalent'},
+      {label:'Confirmations Required', val:'3 confirmations'},
+    ],
+    note:'BTC deposits are credited after 3 network confirmations (~30–60 minutes).'
+  },
+  {
+    id:'paypal', icon:'🅿️', name:'PayPal', sub:'PayPal Transfer',
+    badge:'Instant', badgeColor:'var(--blue)',
+    fields:[
+      {label:'PayPal Email', val:'payments@oridentinc.com'},
+      {label:'Processing Fee', val:'None'},
+      {label:'Min Deposit', val:'$20'},
+      {label:'Note in PayPal', val:'Write your registered email in the note'},
+    ],
+    note:'Send payment to the PayPal email above and include your registered email in the note field.'
+  },
+];
+
+function getPaymentMethods(){
+  try {
+    const saved = localStorage.getItem('orident_payment_methods');
+    return saved ? JSON.parse(saved) : DEFAULT_METHODS;
+  } catch(e){ return DEFAULT_METHODS; }
+}
+
+let selectedMethod = null;
+let selectedAmount = 0;
+
+function renderMethodGrid(){
+  const methods = getPaymentMethods();
+  const grid = document.getElementById('deposit-method-grid');
+  grid.innerHTML = methods.map(m => `
+    <div class="method-card" id="mc-${m.id}" onclick="selectMethod('${m.id}')">
+      <div class="mc-icon">${m.icon}</div>
+      <div class="mc-name">${m.name}</div>
+      <div class="mc-sub">${m.sub}</div>
+      ${m.badge ? `<span class="mc-badge" style="background:${m.badgeColor}20;color:${m.badgeColor};">${m.badge}</span>` : ''}
+    </div>`).join('');
+}
+
+function selectMethod(id){
+  const methods = getPaymentMethods();
+  selectedMethod = methods.find(m=>m.id===id);
+  document.querySelectorAll('.method-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('mc-'+id)?.classList.add('selected');
+  renderMethodDetails(selectedMethod);
+  document.getElementById('method-details-wrap').style.display='block';
+  document.getElementById('method-details-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderMethodDetails(m){
+  const wrap = document.getElementById('method-details-content');
+  wrap.innerHTML = `
+    <h3>${m.icon} ${m.name} — Deposit Instructions</h3>
+    ${m.fields.map(f=>`
+      <div class="detail-row">
+        <div class="dr-label">${f.label}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="dr-val">${f.val}</div>
+          ${f.val.length>10?`<button class="copy-btn" onclick="copyVal('${f.val.replace(/'/g,"\\'")}',this)">Copy</button>`:''}
+        </div>
+      </div>`).join('')}
+    ${m.note?`<div style="margin-top:14px;padding:12px 16px;background:var(--surface);border-radius:8px;font-size:13px;color:var(--ink);line-height:1.6;">💡 ${m.note}</div>`:''}`;
+}
+
+function copyVal(val, btn){
+  navigator.clipboard.writeText(val).then(()=>{
+    btn.textContent='✓ Copied';
+    btn.style.color='var(--green)';
+    setTimeout(()=>{btn.textContent='Copy';btn.style.color='var(--blue)';},2000);
+  });
+}
+
+// Approximate live-ish FX rates (relative to USD, refreshed from ASSETS prices where available)
+const FX_RATES = { EUR: 0.922, GBP: 0.788, JPY: 154.3, BTC: 1/68420, ETH: 1/3842, USDT: 1.0, AED: 3.672, SGD: 1.342, CAD: 1.364, AUD: 1.528, INR: 83.3 };
+
+function updateMinDepBanner(){
+  const MIN = 500;
+  const btcPrice = (typeof ASSETS!=='undefined'&&ASSETS.crypto) ? (ASSETS.crypto.find(c=>c.sym==='BTC')||{price:68420}).price : 68420;
+  const ethPrice = (typeof ASSETS!=='undefined'&&ASSETS.crypto) ? (ASSETS.crypto.find(c=>c.sym==='ETH')||{price:3842}).price : 3842;
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('min-eur','€'+(MIN*FX_RATES.EUR).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+  set('min-gbp','£'+(MIN*FX_RATES.GBP).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+  set('min-jpy','¥'+(MIN*FX_RATES.JPY).toLocaleString('en-US',{maximumFractionDigits:0}));
+  set('min-aed','د.إ'+(MIN*FX_RATES.AED).toLocaleString('en-US',{maximumFractionDigits:0}));
+  set('min-sgd','S$'+(MIN*FX_RATES.SGD).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}));
+  set('min-btc','₿'+(MIN/btcPrice).toFixed(6));
+  set('min-eth','Ξ'+(MIN/ethPrice).toFixed(4));
+  set('min-usdt','₮'+(MIN).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+  set('min-cad','C$'+(MIN*FX_RATES.CAD).toLocaleString('en-US',{maximumFractionDigits:0}));
+  set('min-aud','A$'+(MIN*FX_RATES.AUD).toLocaleString('en-US',{maximumFractionDigits:0}));
+  set('min-inr','₹'+(MIN*FX_RATES.INR).toLocaleString('en-US',{maximumFractionDigits:0}));
+}
+
+function updateCurrencyEquiv(){
+  const usd = parseFloat(document.getElementById('dep-amount').value)||0;
+  const wrap = document.getElementById('currency-equiv');
+  if(usd<1){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  // Pull live prices from ASSETS if available
+  const btcPrice = (typeof ASSETS!=='undefined' && ASSETS.crypto) ? (ASSETS.crypto.find(c=>c.sym==='BTC')||{price:68420}).price : 68420;
+  const ethPrice = (typeof ASSETS!=='undefined' && ASSETS.crypto) ? (ASSETS.crypto.find(c=>c.sym==='ETH')||{price:3842}).price : 3842;
+  document.getElementById('equiv-eur').textContent = '€'+(usd*FX_RATES.EUR).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('equiv-gbp').textContent = '£'+(usd*FX_RATES.GBP).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('equiv-jpy').textContent = '¥'+(usd*FX_RATES.JPY).toLocaleString('en-US',{maximumFractionDigits:0});
+  document.getElementById('equiv-btc').textContent = '₿'+(usd/btcPrice).toFixed(6);
+  document.getElementById('equiv-eth').textContent = 'Ξ'+(usd/ethPrice).toFixed(4);
+  document.getElementById('equiv-usdt').textContent = '₮'+(usd*FX_RATES.USDT).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function setAmt(amt, btn){
+  selectedAmount = amt;
+  document.querySelectorAll('.amt-preset').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('dep-amount').value = amt;
+  updateCurrencyEquiv();
+}
+
+function proofSelected(input){
+  if(input.files?.length) document.getElementById('proof-status').textContent = '✅ '+input.files[0].name;
+}
+
+function submitDeposit(){
+  if(!selectedMethod){ showToast('Please select a deposit method','error','⚠️'); return; }
+  const amt = parseFloat(document.getElementById('dep-amount').value);
+  if(!amt||amt<500){ showToast('Please enter a valid amount (min $500)','error','⚠️'); return; }
+  const tx = {
+    id: 'TX'+Date.now(),
+    date: new Date().toLocaleDateString(),
+    type:'Deposit',
+    method: selectedMethod.name,
+    amount: '$'+amt.toLocaleString(),
+    status:'Pending'
+  };
+  const txs = JSON.parse(localStorage.getItem('orident_transactions')||'[]');
+  txs.unshift(tx);
+  localStorage.setItem('orident_transactions', JSON.stringify(txs));
+  renderTxHistory();
+  switchDep('history');
+  showToast(`Deposit of $${amt.toLocaleString()} submitted! Your account will be credited after confirmation.`,'success','✅',5000);
+}
+
+function submitWithdrawal(){
+  const amt = parseFloat(document.getElementById('wd-amount').value);
+  const method = document.getElementById('wd-method').value;
+  const addr = document.getElementById('wd-address').value.trim();
+  if(!amt||amt<500){ showToast('Please enter a valid amount (min $500)','error','⚠️'); return; }
+  if(!method){ showToast('Please select a withdrawal method','error','⚠️'); return; }
+  if(!addr){ showToast('Please enter your account or wallet address','error','⚠️'); return; }
+  const tx = {
+    id: 'WD'+Date.now(),
+    date: new Date().toLocaleDateString(),
+    type:'Withdrawal',
+    method,
+    amount: '-$'+amt.toLocaleString(),
+    status:'Pending'
+  };
+  const txs = JSON.parse(localStorage.getItem('orident_transactions')||'[]');
+  txs.unshift(tx);
+  localStorage.setItem('orident_transactions', JSON.stringify(txs));
+  renderTxHistory();
+  switchDep('history');
+  showToast(`Withdrawal of $${amt.toLocaleString()} submitted. Processing within 1–3 business days.`,'success','✅',5000);
+}
+
+function renderTxHistory(){
+  const txs = JSON.parse(localStorage.getItem('orident_transactions')||'[]');
+  const tbody = document.getElementById('tx-body');
+  document.getElementById('tx-count').textContent = txs.length + ' transaction'+(txs.length!==1?'s':'');
+  if(!txs.length){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;">No transactions yet</td></tr>'; return; }
+  tbody.innerHTML = txs.map(tx=>`
+    <tr>
+      <td style="color:var(--muted)">${tx.date}</td>
+      <td><span class="badge ${tx.type==='Deposit'?'badge-up':'badge-down'}">${tx.type}</span></td>
+      <td>${tx.method}</td>
+      <td style="font-family:'DM Mono';font-weight:600;color:${tx.type==='Deposit'?'var(--green)':'var(--red)'}">${tx.amount}</td>
+      <td><span class="badge ${tx.status==='Approved'?'badge-up':tx.status==='Denied'?'badge-down':'badge-blue'}">${tx.status}</span></td>
+    </tr>`).join('');
+}
+
+function switchDep(tab){
+  ['deposit','withdraw','history'].forEach(t=>{
+    document.getElementById('dep-'+t).classList.toggle('active',t===tab);
+  
