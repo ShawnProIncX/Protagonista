@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Get Started – Safe Claim Consults SCCINC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --peach:#F4A57A; --peach2:#F7C4A5; --peach3:#FDE8D8; --peach4:#FEF3EC;
+      --navy:#1A2E44; --navy2:#2C4A6E; --white:#FFFFFF;
+      --text:#1C2B3A; --muted:#6A7A8A; --success:#2A7B6B; --error:#D94040;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--white); min-height: 100vh; }
+
+    /* NAV */
+    nav { position: fixed; top: 0; width: 100%; z-index: 300; background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; padding: 0 6%; height: 70px; border-bottom: 2px solid var(--peach2); box-shadow: 0 2px 20px rgba(244,165,122,0.12); }
+    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo-badge { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, var(--peach), var(--peach2)); display: flex; align-items: center; justify-content: center; }
+    .logo-badge svg { width: 28px; height: 28px; }
+    .logo-text .brand { display: block; font-size: 15px; font-weight: 800; color: var(--navy); }
+    .logo-text .sub { display: block; font-size: 10px; color: var(--peach); font-weight: 600; letter-spacing: 2px; }
+    .back-link { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+    .back-link:hover { color: var(--peach); }
+
+    /* FACTS TICKER */
+    .facts-ticker { position: fixed; top: 70px; width: 100%; z-index: 200; background: linear-gradient(135deg, var(--navy), var(--navy2)); padding: 10px 0; overflow: hidden; }
+    .ticker-track { display: flex; white-space: nowrap; animation: ticker-scroll 50s linear infinite; }
+    .ticker-track:hover { animation-play-state: paused; }
+    .ticker-item { display: inline-flex; align-items: center; gap: 10px; padding: 0 40px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.88); }
+    .ticker-icon { font-size: 15px; }
+    .ticker-item strong { color: var(--peach2); }
+    .ticker-sep { color: var(--peach); font-size: 18px; padding: 0 8px; display: inline-block; }
+    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* TOAST NOTIFICATIONS */
+    #toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+    .toast { background: var(--navy); color: white; padding: 16px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 12px; pointer-events: all; max-width: 340px; animation: toast-in .35s ease; border-left: 4px solid var(--peach); }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--error); background: #2a1a1a; }
+    .toast.info { border-left-color: var(--peach2); }
+    .toast-icon { font-size: 20px; flex-shrink: 0; }
+    .toast-close { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px; padding: 0 4px; }
+    @keyframes toast-in { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+    @keyframes toast-out { from { opacity:1; } to { opacity:0; transform: translateX(40px); } }
+
+    /* FACTS MODAL */
+    #facts-modal { display: none; position: fixed; inset: 0; z-index: 8000; background: rgba(26,46,68,0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+    #facts-modal.open { display: flex; }
+    .modal-box { background: white; border-radius: 20px; padding: 44px 40px; max-width: 560px; width: 90%; position: relative; box-shadow: 0 24px 80px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
+    .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); }
+    .modal-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--peach); margin-bottom: 10px; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--navy); margin-bottom: 24px; }
+    .fact-card { background: var(--peach4); border: 1px solid var(--peach2); border-radius: 14px; padding: 20px 22px; margin-bottom: 14px; display: flex; gap: 16px; align-items: flex-start; }
+    .fact-num { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--peach), var(--peach2)); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: var(--navy); flex-shrink: 0; }
+    .fact-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+    .fact-text strong { color: var(--navy); }
+    .modal-cta { width: 100%; margin-top: 8px; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--peach), var(--peach2)); color: var(--navy); font-family: 'Inter', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; }
+
+    /* LAYOUT */
+    .page-hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; padding-top: 110px; }
+    .hero-left { position: relative; overflow: hidden; }
+    .hero-left-bg { position: absolute; inset: 0; display: grid; grid-template-rows: 1fr 1fr; }
+    .hero-left-bg img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.42); }
+    .hero-left-overlay { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(244,165,122,0.6) 0%, rgba(26,46,68,0.85) 100%); }
+    .hero-left-content { position: relative; z-index: 2; padding: 64px 48px; display: flex; flex-direction: column; justify-content: center; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--peach2); margin-bottom: 20px; }
+    .hero-left-content h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3vw, 2.8rem); color: white; line-height: 1.2; margin-bottom: 20px; }
+    .hero-left-content h1 em { color: var(--peach2); font-style: normal; }
+    .hero-left-content p { color: rgba(255,255,255,0.75); font-size: 15px; line-height: 1.8; margin-bottom: 36px; }
+    .trust-items { display: flex; flex-direction: column; gap: 14px; }
+    .trust-item { display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.85); font-size: 14px; }
+    .trust-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--peach); flex-shrink: 0; }
+    .stat-highlight { background: rgba(255,255,255,0.1); border: 1px solid rgba(244,165,122,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 36px; }
+    .stat-highlight .num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 800; color: var(--peach2); }
+    .stat-highlight .lbl { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 4px; }
+    .facts-btn { margin-top: 20px; background: rgba(244,165,122,0.2); border: 1px solid rgba(244,165,122,0.5); color: var(--peach2); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: background .2s; width: fit-content; }
+    .facts-btn:hover { background: rgba(244,165,122,0.35); }
+
+    /* FORM RIGHT */
+    .hero-right { background: var(--peach4); display: flex; flex-direction: column; justify-content: center; padding: 60px 48px; overflow-y: auto; }
+    .auth-tabs { display: flex; margin-bottom: 32px; background: #EDD8C8; border-radius: 10px; padding: 4px; }
+    .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; color: var(--muted); cursor: pointer; border-radius: 8px; transition: all .2s; }
+    .tab-btn.active { background: white; color: var(--navy); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+    .panel-title { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: var(--navy); margin-bottom: 8px; }
+    .panel-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); letter-spacing: 0.5px; margin-bottom: 7px; text-transform: uppercase; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 13px 16px; border: 1.5px solid #E0CFC4; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); background: white; transition: border-color .2s, box-shadow .2s; outline: none; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--peach); box-shadow: 0 0 0 3px rgba(244,165,122,0.18); }
+    .form-group textarea { resize: vertical; min-height: 100px; }
+    .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236A7A8A' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+    .captcha-box { border: 1.5px solid #E0CFC4; border-radius: 10px; padding: 16px 18px; background: white; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; cursor: pointer; user-select: none; transition: border-color .2s; }
+    .captcha-box:hover { border-color: var(--peach); }
+    .captcha-check { width: 24px; height: 24px; border: 2px solid #C0B0A5; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; font-size: 14px; font-weight: 800; color: white; }
+    .captcha-check.checked { background: var(--success); border-color: var(--success); }
+    .captcha-text { font-size: 14px; color: var(--text); font-weight: 500; }
+    .captcha-logo { margin-left: auto; font-size: 10px; color: var(--muted); text-align: center; line-height: 1.4; }
+    .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--peach), var(--peach2)); color: var(--navy); font-family: 'Inter', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; transition: transform .2s, box-shadow .2s; box-shadow: 0 4px 20px rgba(244,165,122,0.4); }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(244,165,122,0.55); }
+    .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+    .btn-secondary { width: 100%; padding: 14px; border: 1.5px solid var(--peach2); border-radius: 10px; background: var(--peach4); color: var(--navy); font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .2s; margin-top: 10px; }
+    .btn-secondary:hover { background: var(--peach3); }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider span { color: var(--muted); font-size: 12px; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:#E0CFC4; }
+    .alert { padding: 14px 18px; border-radius: 10px; font-size: 14px; font-weight: 500; margin-bottom: 18px; display: none; }
+    .alert.success { background: #D6F0EB; color: var(--success); border: 1px solid #A8DDD4; display: block; }
+    .alert.error { background: #FDE8E8; color: var(--error); border: 1px solid #F4BEBE; display: block; }
+    .alert.info { background: var(--peach4); color: var(--navy); border: 1px solid var(--peach2); display: block; }
+
+    /* 6-digit code input */
+    .code-inputs { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+    .code-inputs input { width: 48px; height: 56px; text-align: center; font-size: 22px; font-weight: 800; border: 2px solid #E0CFC4; border-radius: 10px; color: var(--navy); font-family: 'Inter', sans-serif; outline: none; transition: border-color .2s, box-shadow .2s; }
+    .code-inputs input:focus { border-color: var(--peach); box-shadow: 0 0 0 3px rgba(244,165,122,0.2); }
+
+    /* Claim portal */
+    .message-panel { display: none; }
+    .message-panel.active { display: block; }
+    .claim-step-panel { display: none; }
+    #claim-step-1 { display: block; }
+    .upload-zone { border: 1.5px dashed #E8D5C4; border-radius: 10px; padding: 20px; margin-bottom: 16px; background: #FAFAFA; cursor: pointer; text-align: center; transition: border-color .2s; }
+    .upload-zone:hover { border-color: #C8A882; background: #FDF3EB; }
+    .upload-zone.has-file { border-color: #2E6B3E; background: #EAF4EE; }
+    .t-step { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px dashed #E8D5C4; }
+    .t-step.t-last { border-bottom: none; }
+    .t-dot { width: 28px; height: 28px; border-radius: 50%; background: #E8D5C4; color: #9BA8B0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+    .t-dot-done { background: #2E6B3E !important; color: white !important; }
+    .t-step.t-done .t-dot { background: #2E6B3E; color: white; }
+
+    /* CLAIM PORTAL TABS */
+    .portal-nav { display: flex; gap: 4px; flex-wrap: wrap; background: var(--peach4); border-radius: 12px; padding: 5px; margin-bottom: 26px; }
+    .portal-tab { flex: 1; min-width: 80px; padding: 9px 8px; border: none; background: transparent; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; color: var(--muted); cursor: pointer; border-radius: 8px; transition: all .2s; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .portal-tab .pt-icon { font-size: 16px; }
+    .portal-tab.active { background: white; color: var(--navy); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .portal-tab.done::after { content: '✓'; position: absolute; top: 4px; right: 6px; font-size: 10px; color: var(--success); font-weight: 800; }
+    .portal-tab { position: relative; }
+    .portal-section { display: none; }
+    .portal-section.active { display: block; }
+
+    /* CLAIM FORM */
+    .claim-step-label { display: inline-flex; align-items: center; gap: 6px; background: var(--peach3); color: var(--navy); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .radio-opt { display: flex; align-items: center; gap: 7px; padding: 10px 16px; border: 2px solid var(--peach3); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--navy); transition: all .2s; }
+    .radio-opt input { accent-color: var(--peach); }
+    .radio-opt:has(input:checked) { border-color: var(--peach); background: var(--peach4); }
+
+    /* DOC UPLOAD */
+    .upload-zone { border: 2px dashed var(--peach2); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; transition: all .2s; background: var(--peach4); position: relative; overflow: hidden; margin-bottom: 14px; }
+    .upload-zone:hover { border-color: var(--peach); background: var(--peach3); }
+    .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-icon { font-size: 28px; margin-bottom: 8px; }
+    .upload-label { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .upload-sub { font-size: 12px; color: var(--muted); }
+    .upload-optional { font-size: 11px; color: var(--peach); font-weight: 600; margin-top: 6px; }
+    .file-selected { font-size: 12px; color: var(--success); font-weight: 600; margin-top: 6px; }
+
+    /* CASE EVAL */
+    .timeline-steps { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+    .timeline-step { display: flex; align-items: flex-start; gap: 14px; padding-bottom: 20px; position: relative; }
+    .timeline-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 36px; width: 2px; height: calc(100% - 20px); background: var(--peach2); }
+    .ts-dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+    .ts-dot.done { background: var(--success); }
+    .ts-dot.active { background: var(--peach); }
+    .ts-dot.pending { background: var(--peach3); }
+    .ts-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .ts-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .eval-box { background: var(--peach4); border: 1px solid var(--peach2); border-radius: 10px; padding: 18px; margin-bottom: 16px; font-size: 14px; line-height: 1.7; color: var(--navy); }
+    .eval-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .eval-stat { background: white; border: 1px solid var(--peach2); border-radius: 8px; padding: 14px; text-align: center; }
+    .eval-stat .es-val { font-size: 1.3rem; font-weight: 800; color: var(--peach); font-family: 'Playfair Display', serif; }
+    .eval-stat .es-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* CALCULATOR */
+    .calc-box { background: linear-gradient(135deg, var(--navy), var(--navy2)); border-radius: 12px; padding: 22px; margin-bottom: 16px; color: white; }
+    .calc-title { font-family: 'Playfair Display', serif; font-size: 16px; margin-bottom: 14px; color: var(--peach2); }
+    .calc-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .calc-row label { font-size: 12px; color: rgba(255,255,255,.65); flex: 1; }
+    .calc-row input, .calc-row select { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 8px 10px; color: white; font-family: 'Inter', sans-serif; font-size: 13px; outline: none; width: 140px; }
+    .calc-result { background: rgba(244,165,122,.15); border: 1px solid var(--peach); border-radius: 8px; padding: 14px; text-align: center; margin-top: 12px; }
+    .calc-amount { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--peach2); font-weight: 700; }
+    .calc-note { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+    /* AGREEMENT */
+    .agreement-text { background: var(--peach4); border: 1px solid var(--peach2); border-radius: 10px; padding: 20px; font-size: 13px; line-height: 1.9; color: var(--navy); max-height: 220px; overflow-y: auto; margin-bottom: 16px; }
+    .fee-tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+    .fee-tier { border: 2px solid var(--peach2); border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; transition: all .2s; }
+    .fee-tier.selected { border-color: var(--peach); background: var(--peach4); }
+    .fee-tier .ft-pct { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--peach); font-weight: 700; }
+    .fee-tier .ft-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .sig-canvas-wrap { border: 2px solid var(--peach2); border-radius: 10px; overflow: hidden; margin-bottom: 10px; position: relative; background: white; }
+    .sig-canvas-wrap canvas { display: block; touch-action: none; }
+    .sig-label { font-size: 11px; color: var(--muted); text-align: center; padding: 6px; background: var(--peach4); }
+    .check-agree { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--navy); margin-bottom: 16px; cursor: pointer; }
+    .check-agree input { margin-top: 2px; accent-color: var(--peach); width: auto; flex-shrink: 0; }
+
+    /* TRACKER */
+    .tracker-card { background: white; border: 1px solid var(--peach2); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .tracker-status { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .status-dot-large { width: 14px; height: 14px; border-radius: 50%; background: var(--peach); animation: pulse 2s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.7;transform:scale(1.15);} }
+    .status-text { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--navy); }
+    .tracker-steps { display: flex; flex-direction: column; gap: 2px; }
+    .tk-step { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; font-size: 13px; }
+    .tk-step.completed { background: #f0faf7; }
+    .tk-step.current { background: var(--peach4); border: 1px solid var(--peach2); }
+    .tk-step.upcoming { opacity: .5; }
+    .tk-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+    .tk-label { font-weight: 600; color: var(--navy); flex: 1; }
+    .tk-time { font-size: 11px; color: var(--muted); }
+    .trust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .trust-item { background: var(--peach4); border: 1px solid var(--peach2); border-radius: 8px; padding: 14px; display: flex; align-items: flex-start; gap: 10px; }
+    .trust-icon { font-size: 20px; flex-shrink: 0; }
+    .trust-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .trust-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .user-greeting { background: linear-gradient(135deg, var(--peach3), var(--peach4)); border: 1px solid var(--peach2); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--peach), var(--peach2)); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--navy); font-size: 15px; }
+    .user-info .name { font-weight: 700; color: var(--navy); font-size: 15px; }
+    .user-info .email-txt { font-size: 12px; color: var(--muted); }
+    .logout-btn { margin-left: auto; background: none; border: 1px solid #E0CFC4; padding: 6px 14px; border-radius: 6px; font-size: 12px; color: var(--muted); cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; }
+    .logout-btn:hover { border-color: var(--peach); color: var(--peach); }
+    .message-to { background: white; border: 1.5px solid #E0CFC4; border-radius: 10px; padding: 13px 16px; margin-bottom: 16px; font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+    .message-to strong { color: var(--navy); }
+    .terms-text { font-size: 12px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.6; }
+    .terms-text a { color: var(--peach); text-decoration: none; }
+
+    @media (max-width: 900px) {
+      .page-hero { grid-template-columns: 1fr; padding-top: 110px; }
+      .hero-left { min-height: 320px; }
+      .hero-right { padding: 40px 28px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- FACTS MODAL -->
+<div id="facts-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeFactsModal()">✕</button>
+    <div class="modal-eyebrow">Did You Know?</div>
+    <h2 class="modal-title">Surplus Funds &amp; Tax Facts</h2>
+    <div class="fact-card"><div class="fact-num">1</div><div class="fact-text"><strong>$68 Billion in unclaimed funds</strong> are currently held by U.S. state governments — money belonging to real people who simply don't know it's there.</div></div>
+    <div class="fact-card"><div class="fact-num">2</div><div class="fact-text"><strong>After a foreclosure sale,</strong> if the property sells for more than the mortgage balance, the former owner is legally entitled to that surplus — but most never claim it.</div></div>
+    <div class="fact-card"><div class="fact-num">3</div><div class="fact-text"><strong>Tax overpayments are extremely common.</strong> Millions of businesses and individuals overpay federal and state taxes each year without realizing they can apply for a refund.</div></div>
+    <div class="fact-card"><div class="fact-num">4</div><div class="fact-text"><strong>Unclaimed funds never expire</strong> in most U.S. states — money held from a deceased relative's account 20 years ago can still be claimed by rightful heirs today.</div></div>
+    <div class="fact-card"><div class="fact-num">5</div><div class="fact-text"><strong>1 in 10 Americans</strong> has unclaimed property waiting for them. The average claim value is over $1,000 — and many are worth tens of thousands of dollars.</div></div>
+    <button class="modal-cta" onclick="closeFactsModal()">Start My Free Claim Search →</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-badge">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18.5" y="27" width="4" height="9" rx="2" fill="#1A2E44"/>
+        <ellipse cx="20" cy="25.5" rx="12" ry="6.5" fill="#1A2E44"/>
+        <ellipse cx="20" cy="19.5" rx="9" ry="5.5" fill="#2C4A6E"/>
+        <ellipse cx="20" cy="13.5" rx="6.5" ry="5" fill="#1A2E44"/>
+        <circle cx="14" cy="23" r="1.4" fill="rgba(255,255,255,0.38)"/>
+        <circle cx="26" cy="21" r="1.1" fill="rgba(255,255,255,0.3)"/>
+        <circle cx="20" cy="10" r="1.2" fill="rgba(255,255,255,0.4)"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="brand">SAFE CLAIM CONSULTS</span>
+      <span class="sub">SCCINC</span>
+    </div>
+  </a>
+  <a href="index.html" class="back-link">← Back to Main Site</a>
+</nav>
+
+<!-- FACTS TICKER -->
+<div class="facts-ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-icon">💡</span><strong>$68 Billion</strong> in unclaimed funds sit with U.S. state governments right now</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">🏠</span>Foreclosure surplus belongs to the <strong>former homeowner</strong> — not the bank</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">📊</span><strong>1 in 10 Americans</strong> has unclaimed property waiting to be recovered</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">💰</span>Tax overpayments can be reclaimed — most businesses <strong>never file for refunds</strong></span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">⏳</span>Unclaimed funds <strong>never expire</strong> in most states — it is never too late to claim</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">⚖️</span>Heirs can legally claim <strong>dormant accounts</strong> from deceased relatives' estates</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">🔍</span>Average unclaimed property value: <strong>over $1,000</strong> — many claims worth far more</span>
+    <span class="ticker-sep">✦</span>
+    <!-- duplicate for seamless infinite loop -->
+    <span class="ticker-item"><span class="ticker-icon">💡</span><strong>$68 Billion</strong> in unclaimed funds sit with U.S. state governments right now</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">🏠</span>Foreclosure surplus belongs to the <strong>former homeowner</strong> — not the bank</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">📊</span><strong>1 in 10 Americans</strong> has unclaimed property waiting to be recovered</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">💰</span>Tax overpayments can be reclaimed — most businesses <strong>never file for refunds</strong></span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">⏳</span>Unclaimed funds <strong>never expire</strong> in most states — it is never too late to claim</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">⚖️</span>Heirs can legally claim <strong>dormant accounts</strong> from deceased relatives' estates</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item"><span class="ticker-icon">🔍</span>Average unclaimed property value: <strong>over $1,000</strong> — many claims worth far more</span>
+    <span class="ticker-sep">✦</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="page-hero">
+
+  <!-- LEFT -->
+  <div class="hero-left">
+    <div class="hero-left-bg">
+      <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80" alt="Office professionals"/>
+      <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80" alt="Diverse team consulting"/>
+    </div>
+    <div class="hero-left-overlay"></div>
+    <div class="hero-left-content">
+      <div class="eyebrow">✦ Safe Claim Consults SCCINC</div>
+      <h1>Start Your <em>Free Claim</em><br/>Consultation</h1>
+      <p>Create your account or sign in to connect with our team and begin recovering funds that are rightfully yours.</p>
+      <div class="trust-items">
+        <div class="trust-item"><div class="trust-dot"></div>No upfront fees — ever</div>
+        <div class="trust-item"><div class="trust-dot"></div>Secure &amp; confidential process</div>
+        <div class="trust-item"><div class="trust-dot"></div>Nationwide coverage — all 50 states</div>
+        <div class="trust-item"><div class="trust-dot"></div>Personal consultant assigned to your case</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="num">$8,025,738.60</div>
+        <div class="lbl">Successfully recovered for individuals &amp; businesses</div>
+      </div>
+      <button class="facts-btn" onclick="openFactsModal()">💡 Did You Know? Surplus Fund Facts</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: FORMS -->
+  <div class="hero-right">
+
+    <div class="auth-tabs" id="auth-tabs">
+      <button class="tab-btn active" onclick="switchTab('signup')">Create Account</button>
+      <button class="tab-btn" onclick="switchTab('login')">Sign In</button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div class="auth-panel active" id="panel-signup">
+      <h2 class="panel-title">Create Your Account</h2>
+      <p class="panel-sub">Fill in your details — we'll email you a 6-digit verification code to confirm your identity.</p>
+      <div id="signup-alert" class="alert"></div>
+      <div class="form-row">
+        <div class="form-group"><label>First Name *</label><input type="text" id="su-fname" placeholder="John"/></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="su-lname" placeholder="Doe"/></div>
+      </div>
+      <div class="form-group"><label>Email Address *</label><input type="email" id="su-email" placeholder="john@example.com"/></div>
+      <div class="form-group"><label>Phone Number *</label><input type="tel" id="su-phone" placeholder="+1 (555) 000-0000"/></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Country *</label>
+          <select id="su-country">
+            <option value="">Select country</option>
+            <option value="United States">United States</option>
+            <option value="Canada">Canada</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Australia">Australia</option>
+            <option value="Nigeria">Nigeria</option>
+            <option value="Ghana">Ghana</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>State / Province *</label><input type="text" id="su-state" placeholder="e.g. California"/></div>
+      </div>
+      <div class="form-group"><label>City *</label><input type="text" id="su-city" placeholder="e.g. Los Angeles"/></div>
+      <div class="form-group"><label>Password *</label><input type="password" id="su-pass" placeholder="Create a strong password"/></div>
+      <div class="captcha-box" onclick="toggleCaptcha()">
+        <div class="captcha-check" id="captcha-check"></div>
+        <span class="captcha-text">I'm not a robot</span>
+        <div class="captcha-logo">🔒<br/>Verify</div>
+      </div>
+      <button class="submit-btn" id="signup-btn" onclick="handleSignup()">Send Verification Code →</button>
+      <p class="terms-text">By signing up you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+    </div>
+
+    <!-- EMAIL VERIFY (SIGNUP) -->
+    <div class="auth-panel" id="panel-verify">
+      <h2 class="panel-title">Check Your Email 📬</h2>
+      <p class="panel-sub" id="verify-sub">We sent a 6-digit code to your email. Enter it below to verify your account.</p>
+      <div id="verify-alert" class="alert"></div>
+      <div class="code-inputs">
+        <input type="text" maxlength="1" id="c1" oninput="moveNext(this,'c2')" onkeydown="movePrev(event,null,'c1')"/>
+        <input type="text" maxlength="1" id="c2" oninput="moveNext(this,'c3')" onkeydown="movePrev(event,'c1','c2')"/>
+        <input type="text" maxlength="1" id="c3" oninput="moveNext(this,'c4')" onkeydown="movePrev(event,'c2','c3')"/>
+        <input type="text" maxlength="1" id="c4" oninput="moveNext(this,'c5')" onkeydown="movePrev(event,'c3','c4')"/>
+        <input type="text" maxlength="1" id="c5" oninput="moveNext(this,'c6')" onkeydown="movePrev(event,'c4','c5')"/>
+        <input type="text" maxlength="1" id="c6" oninput="moveNext(this,null)" onkeydown="movePrev(event,'c5','c6')"/>
+      </div>
+      <button class="submit-btn" onclick="handleVerifySignup()">✓ Verify &amp; Create Account</button>
+      <button class="btn-secondary" onclick="resendCode('signup')">Resend Code</button>
+      <p class="terms-text">Didn't get it? Check spam or <a href="#" onclick="goBackToSignup()">go back and re-enter your email</a>.</p>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-panel" id="panel-login">
+      <h2 class="panel-title">Welcome Back</h2>
+      <p class="panel-sub">Sign in to continue managing your claim and message our team.</p>
+      <div id="login-alert" class="alert"></div>
+      <div class="form-group"><label>Email Address *</label><input type="email" id="li-email" placeholder="john@example.com"/></div>
+      <div class="form-group"><label>Password *</label><input type="password" id="li-pass" placeholder="Your password"/></div>
+      <button class="submit-btn" onclick="handleLogin()">Sign In to My Account</button>
+      <div class="divider"><span>or</span></div>
+      <button class="btn-secondary" onclick="switchTab('forgot')">Forgot Password?</button>
+      <button class="btn-secondary" onclick="switchTab('signup')" style="margin-top:8px;">Create a New Account</button>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="auth-panel" id="panel-forgot">
+      <h2 class="panel-title">Reset Password 🔑</h2>
+      <p class="panel-sub">Enter your email and we will send you a 6-digit reset code.</p>
+      <div id="forgot-alert" class="alert"></div>
+      <div class="form-group"><label>Email Address *</label><input type="email" id="fp-email" placeholder="john@example.com"/></div>
+      <button class="submit-btn" id="forgot-btn" onclick="handleForgotPassword()">Send Reset Code →</button>
+      <button class="btn-secondary" onclick="switchTab('login')">← Back to Sign In</button>
+    </div>
+
+    <!-- RESET VERIFY -->
+    <div class="auth-panel" id="panel-reset-verify">
+      <h2 class="panel-title">Enter Reset Code 🔐</h2>
+      <p class="panel-sub">Enter the 6-digit code sent to your email, then set your new password.</p>
+      <div id="reset-alert" class="alert"></div>
+      <div class="code-inputs">
+        <input type="text" maxlength="1" id="r1" oninput="moveNext(this,'r2')" onkeydown="movePrev(event,null,'r1')"/>
+        <input type="text" maxlength="1" id="r2" oninput="moveNext(this,'r3')" onkeydown="movePrev(event,'r1','r2')"/>
+        <input type="text" maxlength="1" id="r3" oninput="moveNext(this,'r4')" onkeydown="movePrev(event,'r2','r3')"/>
+        <input type="text" maxlength="1" id="r4" oninput="moveNext(this,'r5')" onkeydown="movePrev(event,'r3','r4')"/>
+        <input type="text" maxlength="1" id="r5" oninput="moveNext(this,'r6')" onkeydown="movePrev(event,'r4','r5')"/>
+        <input type="text" maxlength="1" id="r6" oninput="moveNext(this,null)" onkeydown="movePrev(event,'r5','r6')"/>
+      </div>
+      <div class="form-group"><label>New Password *</label><input type="password" id="new-pass" placeholder="Enter your new password"/></div>
+      <div class="form-group"><label>Confirm New Password *</label><input type="password" id="confirm-pass" placeholder="Re-enter your new password"/></div>
+      <button class="submit-btn" onclick="handleResetPassword()">✓ Reset My Password</button>
+      <button class="btn-secondary" onclick="resendCode('reset')">Resend Code</button>
+    </div>
+
+    <!-- CLAIM PORTAL (post-login) -->
+    <div class="message-panel" id="message-panel">
+
+      <!-- USER GREETING BAR -->
+      <div class="user-greeting">
+        <div class="user-avatar" id="user-avatar">J</div>
+        <div class="user-info">
+          <div class="name" id="user-name-display">John Doe</div>
+          <div class="email-txt" id="user-email-display">user@email.com</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+
+      <!-- CLAIM STEP NAV -->
+      <div id="claim-step-nav" style="display:flex;gap:0;margin-bottom:28px;border-radius:10px;overflow:hidden;border:1px solid #E8D5C4;">
+        <div class="claim-step-btn active" id="stepbtn-1" onclick="showClaimStep(1)" style="flex:1;padding:11px 6px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:#FDEEDE;color:#8B4A2F;border-right:1px solid #E8D5C4;transition:all .2s;">&#9312; Verify</div>
+        <div class="claim-step-btn" id="stepbtn-2" onclick="showClaimStep(2)" style="flex:1;padding:11px 6px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:white;color:#9BA8B0;border-right:1px solid #E8D5C4;transition:all .2s;">&#9313; Documents</div>
+        <div class="claim-step-btn" id="stepbtn-3" onclick="showClaimStep(3)" style="flex:1;padding:11px 6px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:white;color:#9BA8B0;border-right:1px solid #E8D5C4;transition:all .2s;">&#9314; Agreement</div>
+        <div class="claim-step-btn" id="stepbtn-4" onclick="showClaimStep(4)" style="flex:1;padding:11px 6px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:white;color:#9BA8B0;border-right:1px solid #E8D5C4;transition:all .2s;">&#9315; Tracker</div>
+        <div class="claim-step-btn" id="stepbtn-5" onclick="showClaimStep(5)" style="flex:1;padding:11px 6px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:white;color:#9BA8B0;transition:all .2s;">&#x2709;&#xFE0F; Message</div>
+      </div>
+
+      <!-- STEP 1: CLAIM VERIFICATION FORM -->
+      <div id="claim-step-1" class="claim-step-panel">
+        <h2 class="panel-title">Claim Verification Form</h2>
+        <p class="panel-sub">Help us confirm you are the correct claimant by providing your property details. This matches your information with county records and state agency databases.</p>
+        <div id="claim-form-alert" class="alert" style="display:none;"></div>
+        <form id="claim_form" onsubmit="return false;">
+          <div class="form-group"><label>Full Legal Name *</label><input type="text" id="cf-fullname" placeholder="As it appears on property records"/></div>
+          <div class="form-group"><label>Previous Property Address *</label><input type="text" id="cf-address" placeholder="Street address of the property"/></div>
+          <div class="form-group"><label>County Where Property Was Located *</label><input type="text" id="cf-county" placeholder="e.g. Los Angeles County, Cook County"/></div>
+          <div class="form-group"><label>State *</label>
+            <select id="cf-state"><option value="">Select state</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option><option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option><option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option></select>
+          </div>
+          <div class="form-group"><label>Year of Sale / Foreclosure (if known)</label><input type="number" id="cf-year" placeholder="e.g. 2019" min="1990" max="2025"/></div>
+          <div class="form-group"><label>Phone Number *</label><input type="tel" id="cf-phone" placeholder="+1 (555) 000-0000"/></div>
+          <div class="form-group"><label>Email Address *</label><input type="email" id="cf-email" placeholder="your@email.com"/></div>
+          <div class="form-group"><label>Relationship to Property *</label>
+            <select id="cf-relationship" onchange="document.getElementById('cf-other-wrap').style.display=this.value==='other'?'block':'none'">
+              <option value="">Select relationship</option>
+              <option value="owner">Owner &mdash; I was the property owner</option>
+              <option value="heir">Heir &mdash; I am a family member / heir of the owner</option>
+              <option value="trustee">Trustee &mdash; I manage this as a trust or estate</option>
+              <option value="other">Other (please describe below)</option>
+            </select>
+          </div>
+          <div class="form-group" id="cf-other-wrap" style="display:none;"><label>Please Describe Your Relationship</label><textarea id="cf-other" placeholder="Explain your relationship to the property..." style="height:80px;"></textarea></div>
+
+          <div style="background:#FDF3EB;border:1px solid #F0C9A0;border-radius:10px;padding:18px;margin-bottom:20px;">
+            <div style="font-size:13px;font-weight:700;color:#8B4A2F;margin-bottom:10px;">&#x1F9EE; Estimated Claim Calculator</div>
+            <p style="font-size:12px;color:#A0876E;margin-bottom:12px;">Enter your property details to estimate potential surplus funds:</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:140px;"><label style="font-size:11px;color:#A0876E;display:block;margin-bottom:5px;">Property Sale Price ($)</label><input type="number" id="calc-sale" placeholder="e.g. 280000" style="width:100%;padding:10px 12px;border:1.5px solid #E8D5C4;border-radius:8px;font-family:inherit;font-size:14px;" oninput="calcEstimate()"/></div>
+              <div style="flex:1;min-width:140px;"><label style="font-size:11px;color:#A0876E;display:block;margin-bottom:5px;">Outstanding Debt Owed ($)</label><input type="number" id="calc-debt" placeholder="e.g. 210000" style="width:100%;padding:10px 12px;border:1.5px solid #E8D5C4;border-radius:8px;font-family:inherit;font-size:14px;" oninput="calcEstimate()"/></div>
+            </div>
+            <div id="calc-result" style="margin-top:12px;padding:12px;background:white;border-radius:8px;border:1px solid #E8D5C4;display:none;">
+              <div style="font-size:11px;color:#A0876E;margin-bottom:4px;">Estimated Surplus Funds</div>
+              <div id="calc-amount" style="font-size:1.4rem;font-weight:800;color:#2E6B3E;"></div>
+              <div style="font-size:11px;color:#A0876E;margin-top:4px;">*Estimate only. Actual amount determined by county records.</div>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="submitClaimForm()">Submit Claim Verification &#8594;</button>
+        </form>
+      </div>
+
+      <!-- STEP 2: DOCUMENT UPLOAD -->
+      <div id="claim-step-2" class="claim-step-panel" style="display:none;">
+        <h2 class="panel-title">Document Upload</h2>
+        <p class="panel-sub">Upload proof of identity and property ownership so our team can verify your claim with county and state records.</p>
+        <div style="background:#FDF3EB;border:1px solid #F0C9A0;border-radius:10px;padding:14px 18px;margin-bottom:22px;font-size:13px;color:#8B4A2F;">&#x1F512; <strong>Secure Upload:</strong> All documents are encrypted and stored securely. We will never share your information with third parties.</div>
+        <form id="doc_upload" onsubmit="return false;">
+          <div class="upload-zone" onclick="document.getElementById('upload-id').click()" id="drop-id"><div style="font-size:28px;margin-bottom:6px;">&#x1FAAA;</div><div style="font-size:14px;font-weight:700;color:#1A2E44;margin-bottom:4px;">Government-Issued ID *</div><div style="font-size:12px;color:#9BA8B0;">Driver's license, passport, or state ID</div><div id="upload-id-name" style="font-size:12px;color:#2E6B3E;margin-top:8px;font-weight:600;"></div><input type="file" id="upload-id" accept="image/*,.pdf" style="display:none;" onchange="showFileName(this,'upload-id-name','drop-id')"/><div style="margin-top:10px;padding:8px 18px;background:#FDEEDE;color:#8B4A2F;border-radius:6px;display:inline-block;font-size:12px;font-weight:700;">Click to Upload</div></div>
+          <div class="upload-zone" onclick="document.getElementById('upload-addr').click()" id="drop-addr"><div style="font-size:28px;margin-bottom:6px;">&#x1F3E0;</div><div style="font-size:14px;font-weight:700;color:#1A2E44;margin-bottom:4px;">Proof of Address *</div><div style="font-size:12px;color:#9BA8B0;">Utility bill, bank statement, or lease (last 3 months)</div><div id="upload-addr-name" style="font-size:12px;color:#2E6B3E;margin-top:8px;font-weight:600;"></div><input type="file" id="upload-addr" accept="image/*,.pdf" style="display:none;" onchange="showFileName(this,'upload-addr-name','drop-addr')"/><div style="margin-top:10px;padding:8px 18px;background:#FDEEDE;color:#8B4A2F;border-radius:6px;display:inline-block;font-size:12px;font-weight:700;">Click to Upload</div></div>
+          <div class="upload-zone" onclick="document.getElementById('upload-prop').click()" id="drop-prop"><div style="font-size:28px;margin-bottom:6px;">&#x1F4C4;</div><div style="font-size:14px;font-weight:700;color:#1A2E44;margin-bottom:4px;">Property Documents <span style="font-weight:400;color:#9BA8B0">(Optional)</span></div><div style="font-size:12px;color:#9BA8B0;">Deed, tax records, closing documents, or foreclosure notice</div><div id="upload-prop-name" style="font-size:12px;color:#2E6B3E;margin-top:8px;font-weight:600;"></div><input type="file" id="upload-prop" accept="image/*,.pdf" style="display:none;" onchange="showFileName(this,'upload-prop-name','drop-prop')"/><div style="margin-top:10px;padding:8px 18px;background:#FDEEDE;color:#8B4A2F;border-radius:6px;display:inline-block;font-size:12px;font-weight:700;">Click to Upload</div></div>
+          <div class="upload-zone" onclick="document.getElementById('upload-prob').click()" id="drop-prob"><div style="font-size:28px;margin-bottom:6px;">&#x2696;&#xFE0F;</div><div style="font-size:14px;font-weight:700;color:#1A2E44;margin-bottom:4px;">Probate Documents <span style="font-weight:400;color:#9BA8B0">(If Heir)</span></div><div style="font-size:12px;color:#9BA8B0;">Letters of administration, will, or probate court order</div><div id="upload-prob-name" style="font-size:12px;color:#2E6B3E;margin-top:8px;font-weight:600;"></div><input type="file" id="upload-prob" accept="image/*,.pdf" style="display:none;" onchange="showFileName(this,'upload-prob-name','drop-prob')"/><div style="margin-top:10px;padding:8px 18px;background:#FDEEDE;color:#8B4A2F;border-radius:6px;display:inline-block;font-size:12px;font-weight:700;">Click to Upload</div></div>
+          <div style="background:#EAF4EE;border:1px solid #B6DCC2;border-radius:10px;padding:18px;margin-bottom:22px;">
+            <div style="font-size:14px;font-weight:700;color:#1A4731;margin-bottom:8px;">&#x1F4CB; What Happens After Upload?</div>
+            <p style="font-size:13px;color:#2E6B3E;line-height:1.7;margin-bottom:10px;">Our research team will verify your eligibility with county records and determine the estimated surplus amount owed to you.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div style="background:white;border-radius:7px;padding:12px;text-align:center;border:1px solid #B6DCC2;"><div style="font-size:18px;margin-bottom:4px;">&#x1F50D;</div><div style="font-size:12px;font-weight:700;color:#1A4731;">24&ndash;72 Hour Review</div><div style="font-size:11px;color:#6B8F72;">We cross-check with agencies like the CA State Controller's Office</div></div>
+              <div style="background:white;border-radius:7px;padding:12px;text-align:center;border:1px solid #B6DCC2;"><div style="font-size:18px;margin-bottom:4px;">&#x1F4DE;</div><div style="font-size:12px;font-weight:700;color:#1A4731;">We Contact You</div><div style="font-size:11px;color:#6B8F72;">Via email or phone with findings and next steps</div></div>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="submitDocuments()">Submit Documents &#8594;</button>
+        </form>
+      </div>
+
+      <!-- STEP 3: AGREEMENT -->
+      <div id="claim-step-3" class="claim-step-panel" style="display:none;">
+        <h2 class="panel-title">Service Agreement</h2>
+        <p class="panel-sub">Please review and sign our contingency-based service agreement. You pay <strong>nothing upfront</strong> &mdash; our fee is only collected if funds are successfully recovered.</p>
+        <div style="background:#FDF3EB;border:1px solid #E8D5C4;border-radius:10px;padding:20px;margin-bottom:22px;font-size:13px;color:#5C3A1E;line-height:1.85;">
+          <div style="font-weight:800;font-size:15px;margin-bottom:12px;color:#1A2E44;">SAFE CLAIM CONSULTS SCCINC &mdash; Surplus Funds Recovery Agreement</div>
+          <p style="margin-bottom:10px;">This Agreement is entered into between <strong>Safe Claim Consults SCCINC</strong> ("Consultant") and the undersigned claimant ("Client").</p>
+          <p style="margin-bottom:10px;"><strong>1. Services:</strong> Consultant agrees to research, locate, and attempt to recover surplus funds owed to Client from government agencies, county records, and financial institutions.</p>
+          <p style="margin-bottom:10px;"><strong>2. Contingency Fee:</strong> Client agrees to pay Consultant a recovery fee of <strong>no more than 30%</strong> of any funds successfully recovered. No fee is owed if no funds are recovered.</p>
+          <p style="margin-bottom:10px;"><strong>3. Authorization:</strong> Client authorizes Consultant to act on their behalf to contact relevant agencies, request records, and submit claims related to the identified surplus funds.</p>
+          <p style="margin-bottom:10px;"><strong>4. Confidentiality:</strong> All personal information and documentation provided by Client will be kept strictly confidential and used solely for the purpose of this claim.</p>
+          <p style="margin-bottom:10px;"><strong>5. No Guarantee:</strong> Consultant cannot guarantee recovery of funds. Results depend on applicable laws, statutes of limitations, and agency cooperation.</p>
+          <p><strong>6. Contact:</strong> All communications will be conducted via the email and phone provided during registration.</p>
+        </div>
+        <div id="agreement">
+          <div style="background:white;border:1.5px solid #E8D5C4;border-radius:10px;padding:18px;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;color:#1A2E44;margin-bottom:10px;">&#x1F4CC; Fee Disclosure</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:100px;background:#FDF3EB;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:#8B4A2F;">0%</div><div style="font-size:12px;color:#A0876E;">Upfront Cost</div></div>
+              <div style="flex:1;min-width:100px;background:#EAF4EE;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:#2E6B3E;">&le;30%</div><div style="font-size:12px;color:#6B8F72;">Only If Recovered</div></div>
+              <div style="flex:1;min-width:100px;background:#EBF2FF;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:#1A4E8B;">100%</div><div style="font-size:12px;color:#4A7BC4;">No Recovery = No Fee</div></div>
+            </div>
+          </div>
+          <div style="background:#FDF3EB;border:1.5px solid #E8D5C4;border-radius:10px;padding:18px;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;color:#1A2E44;margin-bottom:12px;">&#x270D;&#xFE0F; Digital Signature</div>
+            <div class="form-group" style="margin-bottom:14px;"><label>Type Your Full Legal Name to Sign *</label><input type="text" id="sig-name" placeholder="Your full name as your digital signature"/></div>
+            <div class="form-group" style="margin-bottom:14px;"><label>Date</label><input type="text" id="sig-date" readonly/></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;"><input type="checkbox" id="agree-terms" style="margin-top:3px;width:auto;flex-shrink:0;"/><label for="agree-terms" style="font-size:13px;color:#5C3A1E;cursor:pointer;">I have read and agree to the Service Agreement above. I authorize Safe Claim Consults SCCINC to research and recover any surplus funds owed to me in exchange for a contingency recovery fee only if funds are successfully recovered.</label></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;"><input type="checkbox" id="agree-privacy" style="margin-top:3px;width:auto;flex-shrink:0;"/><label for="agree-privacy" style="font-size:13px;color:#5C3A1E;cursor:pointer;">I consent to Safe Claim Consults SCCINC contacting me via email and phone regarding my claim. I understand my information is confidential and protected.</label></div>
+          </div>
+        </div>
+        <div id="agreement-alert" class="alert" style="display:none;"></div>
+        <button class="submit-btn" onclick="submitAgreement()">Sign &amp; Submit Agreement &#8594;</button>
+      </div>
+
+      <!-- STEP 4: CASE TRACKER -->
+      <div id="claim-step-4" class="claim-step-panel" style="display:none;">
+        <h2 class="panel-title">Case Status Tracker</h2>
+        <p class="panel-sub">Track your claim as it progresses through our review process.</p>
+        <div id="tracker">
+          <div style="background:linear-gradient(135deg,#2E6B3E,#1A4731);border-radius:14px;padding:24px;color:white;margin-bottom:20px;">
+            <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Current Status</div>
+            <div id="tracker-status" style="font-size:1.2rem;font-weight:800;">&#x1F4CB; Case Submitted</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:8px;" id="tracker-desc">Your claim has been received and is queued for research.</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;background:rgba(255,255,255,.1);border-radius:8px;"><span>&#x23F1;&#xFE0F;</span><span id="tracker-eta" style="font-size:13px;">Estimated Response: <strong>24&ndash;48 hours</strong></span></div>
+          </div>
+          <div style="background:white;border:1px solid #E8D5C4;border-radius:12px;padding:20px;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;color:#1A2E44;margin-bottom:16px;">Claim Progress</div>
+            <div style="position:relative;">
+              <div class="t-step t-done"><div class="t-dot t-dot-done">&#x2713;</div><div><div style="font-size:13px;font-weight:700;color:#1A2E44;">Account Created</div><div style="font-size:12px;color:#9BA8B0;">Identity registered securely</div></div></div>
+              <div class="t-step" id="tstep-claim"><div class="t-dot" id="tdot-claim">2</div><div><div style="font-size:13px;font-weight:700;color:#1A2E44;">Claim Form Submitted</div><div style="font-size:12px;color:#9BA8B0;" id="tsub-claim">Awaiting submission</div></div></div>
+              <div class="t-step" id="tstep-docs"><div class="t-dot" id="tdot-docs">3</div><div><div style="font-size:13px;font-weight:700;color:#1A2E44;">Documents Uploaded</div><div style="font-size:12px;color:#9BA8B0;" id="tsub-docs">Awaiting upload</div></div></div>
+              <div class="t-step" id="tstep-agreement"><div class="t-dot" id="tdot-agreement">4</div><div><div style="font-size:13px;font-weight:700;color:#1A2E44;">Agreement Signed</div><div style="font-size:12px;color:#9BA8B0;" id="tsub-agreement">Awaiting signature</div></div></div>
+              <div class="t-step" id="tstep-review"><div class="t-dot" id="tdot-review">5</div><div><div style="font-size:13px;font-weight:700;color:#1A2E44;">Record Verification</div><div style="font-size:12px;color:#9BA8B0;">County &amp; state records cross-referenced</div></div></div>
+              <div class="t-step t-last" id="tstep-contact"><div class="t-dot" id="tdot-contact">6</div><div><div style="font-size:13px;font-weight:700;color:#1A2E44;">Consultant Contact</div><div style="font-size:12px;color:#9BA8B0;">SCCINC team contacts you with findings</div></div></div>
+            </div>
+          </div>
+          <div style="background:#FDF3EB;border:1px solid #E8D5C4;border-radius:10px;padding:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+            <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#8B4A2F;margin-bottom:4px;">Need an Update?</div><div style="font-size:12px;color:#A0876E;">Our team is available Mon&ndash;Fri, 9AM&ndash;5PM EST.</div></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;"><a href="tel:+16505167732" style="padding:8px 14px;background:#8B4A2F;color:white;border-radius:7px;text-decoration:none;font-size:12px;font-weight:700;">&#x1F4DE; Call Us</a><a href="mailto:safeclaimconsult@proton.me" style="padding:8px 14px;background:white;color:#8B4A2F;border:1px solid #E8D5C4;border-radius:7px;text-decoration:none;font-size:12px;font-weight:700;">✉️ Email Us</a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: MESSAGE -->
+      <div id="claim-step-5" class="claim-step-panel" style="display:none;">
+        <h2 class="panel-title">Send Us a Message</h2>
+        <p class="panel-sub">Our consultants will respond within 1 business day.</p>
+        <div id="message-alert" class="alert"></div>
+        <div style="background:#FDF3EB;border:1px solid #F0C9A0;border-radius:10px;padding:16px;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:700;color:#8B4A2F;margin-bottom:10px;">&#x1F6E1;&#xFE0F; Your Privacy is Protected</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#A0876E;">
+            <div>&#x2705; 100% Confidential &mdash; data never sold</div>
+            <div>&#x2705; No upfront fees &mdash; contingency only</div>
+            <div>&#x2705; We operate in all 50 states</div>
+            <div>&#x2705; Verified by county record agencies</div>
+            <div>&#x2705; Secure encrypted communication</div>
+            <div>&#x2705; We file claims on your behalf at no cost</div>
+          </div>
+        </div>
+        <div class="message-to">&#x1F4E7; To: <strong>safeclaimconsult@proton.me</strong></div>
+        <div class="form-group"><label>Subject</label><input type="text" id="msg-subject" placeholder="e.g. I'd like to start a surplus funds claim"/></div>
+        <div class="form-group"><label>Your Message *</label><textarea id="msg-body" placeholder="Describe your situation..."></textarea></div>
+        <button class="submit-btn" id="send-btn" onclick="handleSendMessage()">&#x1F4E9; Send Message to SCCINC Team</button>
+        <p class="terms-text" style="margin-top:14px;">Replies sent from <strong>safeclaimconsult@proton.me</strong> directly to your inbox.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  emailjs.init("aI-YB9jBUpZPLqUJD");
+  const SVC = "service_zadv4ih", TPL = "template_m1fitro";
+  let users = {}, currentUser = null, captchaVerified = false;
+  let pendingSignup = null, pendingReset = null;
+  let signupCode = null, resetCode = null;
+
+  // ── TOASTS ──
+  function showToast(msg, type='info', icon='💬', duration=4500) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = `<span class="toast-icon">${icon}</span><span style="flex:1">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.animation = 'toast-out .35s ease forwards'; setTimeout(() => t.remove(), 350); }, duration);
+  }
+
+  // ── FACTS MODAL ──
+  function openFactsModal() { document.getElementById('facts-modal').classList.add('open'); }
+  function closeFactsModal() { document.getElementById('facts-modal').classList.remove('open'); }
+  document.getElementById('facts-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeFactsModal(); });
+
+  // ── TABS ──
+  const PANELS = ['signup','verify','login','forgot','reset-verify'];
+  function switchTab(tab) {
+    PANELS.forEach(p => {
+      const el = document.getElementById('panel-' + p);
+      if (el) el.classList.toggle('active', p === tab);
+    });
+    const hideTabs = ['verify','forgot','reset-verify'];
+    document.getElementById('auth-tabs').style.display = hideTabs.includes(tab) ? 'none' : 'flex';
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (tab==='signup'&&i===0)||(tab==='login'&&i===1)));
+    clearAlerts();
+  }
+  function goBackToSignup() { document.getElementById('auth-tabs').style.display = 'flex'; switchTab('signup'); return false; }
+
+  function clearAlerts() { document.querySelectorAll('.alert').forEach(a => { a.style.display='none'; a.className='alert'; }); }
+  function showAlert(id, type, msg) { const el=document.getElementById(id); el.className='alert '+type; el.textContent=msg; el.style.display='block'; }
+
+  // ── CAPTCHA ──
+  function toggleCaptcha() {
+    captchaVerified = !captchaVerified;
+    const el = document.getElementById('captcha-check');
+    el.classList.toggle('checked', captchaVerified);
+    el.textContent = captchaVerified ? '✓' : '';
+  }
+
+  // ── CODE INPUTS ──
+  function moveNext(el, nextId) { if (el.value && nextId) document.getElementById(nextId).focus(); }
+  function movePrev(e, prevId, curId) { if (e.key==='Backspace' && !document.getElementById(curId).value && prevId) document.getElementById(prevId).focus(); }
+  function getCode(prefix) { return ['1','2','3','4','5','6'].map(n => (document.getElementById(prefix+n)||{value:''}).value).join(''); }
+  function clearCodeInputs(prefix) { ['1','2','3','4','5','6'].forEach(n => { const el=document.getElementById(prefix+n); if(el) el.value=''; }); const f=document.getElementById(prefix+'1'); if(f) f.focus(); }
+  function generateCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
+
+  // ── SEND VERIFICATION EMAIL ──
+  function sendVerificationEmail(toEmail, toName, code, purpose) {
+    const label = purpose === 'reset' ? 'Password Reset' : 'Email Verification';
+    const body = `${label} Code\n\nHi ${toName},\n\nYour ${label.toLowerCase()} code for Safe Claim Consults (SCCINC) is:\n\n► ${code} ◄\n\nThis code expires in 10 minutes. Do not share it with anyone.\n\n— Safe Claim Consults SCCINC Team\nsafeclaimconsult@proton.me | +1 (650) 516-7732`;
+    return emailjs.send(SVC, TPL, { from_name: toName, first_name: toName, last_name: '', email: toEmail, phone: 'N/A', country: 'N/A', state: 'N/A', city: 'N/A', message: body });
+  }
+
+  // ── SIGNUP ──
+  function handleSignup() {
+    clearAlerts();
+    const fname=document.getElementById('su-fname').value.trim(), lname=document.getElementById('su-lname').value.trim(),
+          email=document.getElementById('su-email').value.trim(), phone=document.getElementById('su-phone').value.trim(),
+          country=document.getElementById('su-country').value, state=document.getElementById('su-state').value.trim(),
+          city=document.getElementById('su-city').value.trim(), pass=document.getElementById('su-pass').value;
+    if (!fname||!lname||!email||!phone||!country||!state||!city||!pass) { showAlert('signup-alert','error','Please fill in all required fields.'); return; }
+    if (!captchaVerified) { showAlert('signup-alert','error','Please check "I\'m not a robot" first.'); return; }
+    if (users[email]) { showAlert('signup-alert','error','An account with this email already exists. Please sign in.'); return; }
+    const btn = document.getElementById('signup-btn');
+    btn.disabled=true; btn.textContent='Sending code...';
+    signupCode = generateCode();
+    pendingSignup = {fname,lname,email,phone,country,state,city,pass};
+    sendVerificationEmail(email, fname, signupCode, 'signup')
+      .then(() => {
+        document.getElementById('verify-sub').textContent = `We sent a 6-digit code to ${email}. Enter it below to verify.`;
+        switchTab('verify');
+        clearCodeInputs('c');
+        showToast('Verification code sent to ' + email, 'info', '📬');
+      })
+      .catch(() => { showAlert('signup-alert','error','Could not send verification email. Please try again.'); })
+      .finally(() => { btn.disabled=false; btn.textContent='Send Verification Code →'; });
+  }
+
+  function handleVerifySignup() {
+    clearAlerts();
+    const entered = getCode('c');
+    if (entered.length < 6) { showAlert('verify-alert','error','Please enter all 6 digits of the code.'); return; }
+    if (entered !== signupCode) { showAlert('verify-alert','error','Incorrect code. Please try again or request a new one.'); return; }
+    users[pendingSignup.email] = {...pendingSignup};
+    emailjs.send(SVC, TPL, { from_name: pendingSignup.fname+' '+pendingSignup.lname, first_name: pendingSignup.fname, last_name: pendingSignup.lname, email: pendingSignup.email, phone: pendingSignup.phone, country: pendingSignup.country, state: pendingSignup.state, city: pendingSignup.city, message: '--- NEW VERIFIED SIGNUP ---\nThis user verified their email and is ready to begin their surplus funds claim consultation.' }).catch(()=>{});
+    currentUser = users[pendingSignup.email];
+    signupCode = null; pendingSignup = null;
+    showToast('Email verified! Account created. Welcome 🎉', 'success', '✅');
+    showMessagePanel();
+  }
+
+  // ── LOGIN ──
+  function handleLogin() {
+    clearAlerts();
+    const email=document.getElementById('li-email').value.trim(), pass=document.getElementById('li-pass').value;
+    if (!email||!pass) { showAlert('login-alert','error','Please enter your email and password.'); return; }
+    if (!users[email]||users[email].pass!==pass) { showAlert('login-alert','error','Invalid email or password. Please try again or create an account.'); return; }
+    currentUser = users[email];
+    showToast('Welcome back, ' + currentUser.fname + '! 👋', 'success', '✅');
+    showMessagePanel();
+  }
+
+  // ── FORGOT PASSWORD ──
+  function handleForgotPassword() {
+    clearAlerts();
+    const email = document.getElementById('fp-email').value.trim();
+    if (!email) { showAlert('forgot-alert','error','Please enter your email address.'); return; }
+    if (!users[email]) { showAlert('forgot-alert','error','No account found with that email address.'); return; }
+    const btn = document.getElementById('forgot-btn');
+    btn.disabled=true; btn.textContent='Sending code...';
+    resetCode = generateCode();
+    pendingReset = email;
+    sendVerificationEmail(email, users[email].fname, resetCode, 'reset')
+      .then(() => {
+        switchTab('reset-verify');
+        clearCodeInputs('r');
+        document.getElementById('new-pass').value='';
+        document.getElementById('confirm-pass').value='';
+        showToast('Password reset code sent to ' + email, 'info', '🔑');
+      })
+      .catch(() => { showAlert('forgot-alert','error','Could not send reset email. Please try again.'); })
+      .finally(() => { btn.disabled=false; btn.textContent='Send Reset Code →'; });
+  }
+
+  function handleResetPassword() {
+    clearAlerts();
+    const entered=getCode('r'), newPass=document.getElementById('new-pass').value, confirmPass=document.getElementById('confirm-pass').value;
+    if (entered.length < 6) { showAlert('reset-alert','error','Please enter all 6 digits.'); return; }
+    if (entered !== resetCode) { showAlert('reset-alert','error','Incorrect code. Please try again.'); return; }
+    if (!newPass) { showAlert('reset-alert','error','Please enter a new password.'); return; }
+    if (newPass !== confirmPass) { showAlert('reset-alert','error','Passwords do not match.'); return; }
+    users[pendingReset].pass = newPass;
+    const resetEmail = pendingReset;
+    resetCode = null; pendingReset = null;
+    showToast('Password reset successfully! Please sign in.', 'success', '✅');
+    document.getElementById('li-email').value = resetEmail;
+    switchTab('login');
+  }
+
+  // ── RESEND ──
+  function resendCode(type) {
+    if (type==='signup' && pendingSignup) {
+      signupCode = generateCode();
+      sendVerificationEmail(pendingSignup.email, pendingSignup.fname, signupCode, 'signup')
+        .then(() => showToast('New code sent to ' + pendingSignup.email, 'info', '📬'))
+        .catch(() => showToast('Could not resend. Please try again.', 'error', '❌'));
+    } else if (type==='reset' && pendingReset) {
+      resetCode = generateCode();
+      sendVerificationEmail(pendingReset, users[pendingReset].fname, resetCode, 'reset')
+        .then(() => showToast('New reset code sent to ' + pendingReset, 'info', '📬'))
+        .catch(() => showToast('Could not resend. Please try again.', 'error', '❌'));
+    }
+  }
+
+  // ── MESSAGE PANEL ──
+  function showMessagePanel() {
+    document.getElementById('auth-tabs').style.display = 'none';
+    PANELS.forEach(p => { const el=document.getElementById('panel-'+p); if(el) el.classList.remove('active'); });
+    document.getElementById('message-panel').classList.add('active');
+    document.getElementById('user-name-display').textContent = currentUser.fname+' '+currentUser.lname;
+    document.getElementById('user-email-display').textContent = currentUser.email;
+    document.getElementById('user-avatar').textContent = currentUser.fname[0].toUpperCase();
+    clearAlerts();
+  }
+
+  function handleLogout() {
+    currentUser=null; captchaVerified=false;
+    const cc=document.getElementById('captcha-check'); cc.classList.remove('checked'); cc.textContent='';
+    document.getElementById('auth-tabs').style.display='flex';
+    document.getElementById('message-panel').classList.remove('active');
+    switchTab('login');
+    showToast('You have been signed out safely.', 'info', '👋');
+  }
+
+  function handleSendMessage() {
+    clearAlerts();
+    const subject=document.getElementById('msg-subject').value.trim(), body=document.getElementById('msg-body').value.trim();
+    if (!body) { showAlert('message-alert','error','Please write a message before sending.'); return; }
+    const btn=document.getElementById('send-btn'); btn.disabled=true; btn.textContent='Sending...';
+    emailjs.send(SVC, TPL, { from_name: currentUser.fname+' '+currentUser.lname, first_name: currentUser.fname, last_name: currentUser.lname, email: currentUser.email, phone: currentUser.phone||'N/A', country: currentUser.country||'N/A', state: currentUser.state||'N/A', city: currentUser.city||'N/A', message: (subject?'SUBJECT: '+subject+'\n\n':'')+body })
+      .then(() => {
+        showAlert('message-alert','success','✅ Message sent! We will reply within 1 business day.');
+        document.getElementById('msg-subject').value='';
+        document.getElementById('msg-body').value='';
+        showToast('Message delivered to the SCCINC team!', 'success', '📩');
+      })
+      .catch(() => { showAlert('message-alert','error','Failed to send. Please try again or email us directly at safeclaimconsult@proton.me'); btn.disabled=false; btn.textContent='📩 Send Message to SCCINC Team'; });
+  }
+
+  // ── PORTAL NAVIGATION ──────────────────────────────────
+  const PORTAL_SECTIONS = ['claim','docs','eval','agreement','tracker','message'];
+
+  function switchPortal(sec) {
+    PORTAL_SECTIONS.forEach(s => {
+      document.getElementById('portal-'+s).classList.toggle('active', s===sec);
+      const tab = document.getElementById('ptab-'+s);
+      if(tab) tab.classList.toggle('active', s===sec);
+    });
+  }
+
+  function scrollPortalTop() {
+    document.getElementById('message-panel').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // ── CLAIM FORM ──────────────────────────────────────────
+  function submitClaimForm() {
+    const fullname = document.getElementById('cl-fullname').value.trim();
+    const phone    = document.getElementById('cl-phone').value.trim();
+    const email    = document.getElementById('cl-email').value.trim();
+    const address  = document.getElementById('cl-address').value.trim();
+    const county   = document.getElementById('cl-county').value.trim();
+    const relation = document.querySelector('input[name="cl-relation"]:checked');
+    if (!fullname||!phone||!email||!address||!county||!relation) {
+      showAlert('claim-alert','error','Please fill in all required fields and select your relationship to the property.');
+      return;
+    }
+    // Mark step done
+    document.getElementById('ptab-claim').classList.add('done');
+    const now = new Date().toLocaleDateString();
+    const el = document.getElementById('tk-claim-time'); if(el) el.textContent = now;
+    // Send notification email
+    emailjs.send(SVC, TPL, {
+      from_name: currentUser.fname+' '+currentUser.lname,
+      first_name: currentUser.fname, last_name: currentUser.lname,
+      email: currentUser.email, phone: currentUser.phone||phone,
+      country: currentUser.country||'N/A', state: currentUser.state||'N/A', city: currentUser.city||'N/A',
+      message: '--- NEW CLAIM FORM SUBMITTED ---\n\nFull Name: '+fullname+'\nPhone: '+phone+'\nEmail: '+email+'\nProperty Address: '+address+'\nCounty: '+county+'\nYear of Sale: '+(document.getElementById('cl-year').value||'Unknown')+'\nRelationship: '+relation.value+'\nNotes: '+(document.getElementById('cl-notes').value||'None')
+    }).catch(()=>{});
+    showToast('Claim form saved! Moving to document upload.', 'success', '✅');
+    setTimeout(()=>{ switchPortal('docs'); scrollPortalTop(); }, 700);
+  }
+
+  // ── DOCUMENT UPLOAD ─────────────────────────────────────
+  function fileSelected(input, statusId) {
+    const el = document.getElementById(statusId);
+    if (input.files && input.files.length > 0) {
+      const names = Array.from(input.files).map(f=>f.name).join(', ');
+      el.textContent = '✅ Selected: ' + names;
+    }
+  }
+
+  function submitDocs() {
+    const idFile = document.getElementById('file-id').files.length;
+    const addrFile = document.getElementById('file-address').files.length;
+    if (!idFile || !addrFile) {
+      showAlert('docs-alert','error','Please upload your Government ID and Proof of Address (required).');
+      return;
+    }
+    document.getElementById('ptab-docs').classList.add('done');
+    showToast('Documents noted! Proceeding to case evaluation.', 'success', '📁');
+    setTimeout(()=>{ switchPortal('eval'); scrollPortalTop(); }, 700);
+  }
+
+  // ── CALCULATOR ──────────────────────────────────────────
+  function calcEstimate() {
+    const price = parseFloat(document.getElementById('calc-price').value) || 0;
+    const debt  = parseFloat(document.getElementById('calc-debt').value) || 0;
+    const mult  = parseFloat(document.getElementById('calc-type').value) || 0.85;
+    const surplus = Math.max(0, (price - debt) * mult);
+    const el = document.getElementById('calc-result');
+    if (el) el.textContent = '$' + surplus.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  // ── AGREEMENT ───────────────────────────────────────────
+  let selectedFee = '20%';
+  function selectFee(el, fee) {
+    selectedFee = fee;
+    el.closest('.fee-tiers').querySelectorAll('.fee-tier').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  // Signature canvas
+  let sigDrawing = false, sigCtx = null;
+  function initSigCanvas() {
+    const canvas = document.getElementById('sig-canvas');
+    if (!canvas) return;
+    sigCtx = canvas.getContext('2d');
+    sigCtx.strokeStyle = '#1A2E44';
+    sigCtx.lineWidth = 2.5;
+    sigCtx.lineCap = 'round';
+    canvas.addEventListener('mousedown', e => { sigDrawing=true; sigCtx.beginPath(); sigCtx.moveTo(pos(e,canvas).x, pos(e,canvas).y); });
+    canvas.addEventListener('mousemove', e => { if(!sigDrawing) return; const p=pos(e,canvas); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); });
+    canvas.addEventListener('mouseup', ()=>sigDrawing=false);
+    canvas.addEventListener('mouseleave', ()=>sigDrawing=false);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing=true; sigCtx.beginPath(); const p=touchPos(e,canvas); sigCtx.moveTo(p.x,p.y); }, {passive:false});
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!sigDrawing) return; const p=touchPos(e,canvas); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); }, {passive:false});
+    canvas.addEventListener('touchend', ()=>sigDrawing=false);
+  }
+  function pos(e, canvas) { const r=canvas.getBoundingClientRect(); return {x:(e.clientX-r.left)*(canvas.width/r.width), y:(e.clientY-r.top)*(canvas.height/r.height)}; }
+  function touchPos(e, canvas) { const t=e.touches[0]; return pos(t, canvas); }
+  function clearSig() { if(sigCtx) sigCtx.clearRect(0,0,document.getElementById('sig-canvas').width,document.getElementById('sig-canvas').height); }
+
+  function submitAgreement() {
+    const name = document.getElementById('sig-name').value.trim();
+    const agreed = document.getElementById('agree-check').checked;
+    if (!name) { showAlert('agreement-alert','error','Please type your full name as a signature confirmation.'); return; }
+    if (!agreed) { showAlert('agreement-alert','error','Please read and agree to the service agreement.'); return; }
+    const canvas = document.getElementById('sig-canvas');
+    const blank = !canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data.some(v=>v!==0);
+    if (blank) { showAlert('agreement-alert','error','Please sign the signature canvas above.'); return; }
+    document.getElementById('ptab-agreement').classList.add('done');
+    emailjs.send(SVC, TPL, {
+      from_name: currentUser.fname+' '+currentUser.lname,
+      first_name: currentUser.fname, last_name: currentUser.lname,
+      email: currentUser.email, phone: currentUser.phone||'N/A',
+      country: currentUser.country||'N/A', state: currentUser.state||'N/A', city: currentUser.city||'N/A',
+      message: '--- AGREEMENT SIGNED ---\n\nName (typed): '+name+'\nFee Tier Selected: '+selectedFee+'\nDate: '+new Date().toLocaleDateString()+'\nDigital signature captured on canvas.'
+    }).catch(()=>{});
+    showToast('Agreement signed and submitted! Our team will contact you within 24–72 hours. 🎉', 'success', '✅', 6000);
+    setTimeout(()=>{ switchPortal('tracker'); scrollPortalTop(); }, 1000);
+  }
+
+  // Set today's date on agreement
+  function initAgreementDate() {
+    const el = document.getElementById('sig-date');
+    if (el) el.value = new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  }
+
+  // ── ENHANCED showMessagePanel ────────────────────────────
+  function showMessagePanel() {
+    document.getElementById('auth-tabs').style.display = 'none';
+    PANELS.forEach(p => { const el=document.getElementById('panel-'+p); if(el) el.classList.remove('active'); });
+    document.getElementById('message-panel').classList.add('active');
+    document.getElementById('user-name-display').textContent = currentUser.fname+' '+currentUser.lname;
+    document.getElementById('user-email-display').textContent = currentUser.email;
+    document.getElementById('user-avatar').textContent = currentUser.fname[0].toUpperCase();
+    // Pre-fill claim form email/phone if available
+    const ce = document.getElementById('cl-email'); if(ce && !ce.value) ce.value = currentUser.email;
+    const cp = document.getElementById('cl-phone'); if(cp && !cp.value) cp.value = currentUser.pho
